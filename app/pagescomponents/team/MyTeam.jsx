@@ -208,7 +208,7 @@ export default function MyTeam() {
       {!teamData ? (
         <div>
           <h2 className="text-lg font-bold">Takımınız yok</h2>
-          <p>Takım oluşturmak için "Takım Kur" seçeneğini kullanabilirsiniz.</p>
+          <p>Takım oluşturmak için TAKIM KUR seçeneğini kullanabilirsiniz.</p>
 
           <Sheet>
             <SheetTrigger asChild>

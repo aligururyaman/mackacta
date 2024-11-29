@@ -4,6 +4,12 @@
 
 @layer base {
   :root {
+    --font-poppins-bold: "Poppins-Bold", sans-serif;
+    --font-poppins-black: "Poppins-Black", sans-serif;
+    --font-poppins-extra-bold: "Poppins-ExtraBold", sans-serif;
+    --font-poppins-light: "Poppins-Light", sans-serif;
+    --font-poppins-semi-bold: "Poppins-SemiBold", sans-serif;
+
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --muted: 0 0% 96.1%;
@@ -73,6 +79,26 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+  .font-poppinsBold {
+    font-family: var(--font-poppins-bold);
+  }
+
+  .font-poppinsBlack {
+    font-family: var(--font-poppins-black);
+  }
+
+  .font-poppinsExtraBold {
+    font-family: var(--font-poppins-extra-bold);
+  }
+
+  .font-poppinsLight {
+    font-family: var(--font-poppins-light);
+  }
+
+  .font-poppinsSemiBold {
+    font-family: var(--font-poppins-semi-bold);
+  }
 }
 
 @layer utilities {
@@ -89,4 +115,3 @@
     @apply bg-background text-foreground;
   }
 }
-

@@ -24,6 +24,7 @@ import FindTeam from "../pagescomponents/find/FindTeam";
 import ProfileSettings from "../pagescomponents/profile/ProfileSettings";
 import UserInfo from "../pagescomponents/profile/UserInfo";
 import Friends from "../pagescomponents/profile/Friends";
+import Main from "../pagescomponents/main/Main";
 
 
 export default function Dashboard() {
@@ -65,7 +66,7 @@ export default function Dashboard() {
       return <Friends />;
     }
 
-    return <div>Lütfen bir seçenek seçin.</div>;
+    return <div><Main /></div>;
   };
 
   return (

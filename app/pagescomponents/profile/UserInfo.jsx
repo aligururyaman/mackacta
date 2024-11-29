@@ -22,6 +22,7 @@ export default function UserInfo() {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false); // Düzenleme modu
   const [friendRequests, setFriendRequests] = useState([]);
+  const [teamData, setTeamData] = useState(null); // Takım bilgisi için state
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -72,9 +73,6 @@ export default function UserInfo() {
 
 
 
-
-
-
   const handleFriendRequestResponse = async (requestId, status) => {
     try {
       const requestRef = doc(db, "friendRequests", requestId);
@@ -109,16 +107,23 @@ export default function UserInfo() {
     const fetchUserData = async () => {
       try {
         const user = auth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserData(userDoc.data());
-          } else {
-            setEditMode(true); // Bilgi yoksa düzenleme ekranını aç
+        if (!user) return;
+
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setUserData(data);
+
+          // Eğer takım ID'si varsa, takım bilgilerini çek
+          if (data.teamId) {
+            const teamDoc = await getDoc(doc(db, "teams", data.teamId));
+            if (teamDoc.exists()) {
+              setTeamData(teamDoc.data());
+            }
           }
         }
       } catch (error) {
-        console.error("Kullanıcı verileri alınırken hata oluştu:", error);
+        console.error("Kullanıcı veya takım verisi alınırken hata oluştu:", error);
       } finally {
         setLoading(false);
       }
@@ -151,6 +156,7 @@ export default function UserInfo() {
   };
 
 
+
   const handleSave = async () => {
     try {
       const user = auth.currentUser;
@@ -169,7 +175,7 @@ export default function UserInfo() {
   }
 
   return (
-    <div className="p-10">
+    <div className="p-10 font-poppinsLight">
       <header className="flex">
         <div className="flex items-center space-x-6">
           <img
@@ -206,7 +212,7 @@ export default function UserInfo() {
           <p> <span className="font-semibold">Mevki:</span> {userData?.position || "Bilgi Yok"}</p>
         </div>
         <div>
-          <p> <span className="font-semibold">Takım :</span> Takım Yok</p>
+          <p> <span className="font-semibold">Takım:</span> {teamData ? teamData.name : "Takım Yok"}</p>
         </div>
       </div>
 
@@ -285,26 +291,28 @@ export default function UserInfo() {
         </SheetContent>
       </Sheet>
       <div>
-        <h3>Arkadaşlık İstekleri</h3>
         <ul>
           {friendRequests.map((request) => (
-            <li key={request.id} className="flex items-center justify-between">
-              <span>
-                {request.senderName} {request.senderSurname} size arkadaşlık isteği gönderdi.
-              </span>
-              <div>
-                <Button
-                  onClick={() => handleFriendRequestResponse(request.id, "accepted")}
-                >
-                  Kabul Et
-                </Button>
-                <Button
-                  onClick={() => handleFriendRequestResponse(request.id, "rejected")}
-                >
-                  Reddet
-                </Button>
-              </div>
-            </li>
+            <div key={request.id} className="py-10">
+              <h3 className="font-semibold font-poppinsSemiBold ">Bekleyen Arkadaşlık İstekleri</h3>
+              <li className="flex items-center justify-between">
+                <span className="font-poppinsLight">
+                  {request.senderName} {request.senderSurname} size arkadaşlık isteği gönderdi.
+                </span>
+                <div className="flex flex-row gap-2">
+                  <Button className="bg-green-600 w-10 h-10 rounded-full text-2xl"
+                    onClick={() => handleFriendRequestResponse(request.id, "accepted")}
+                  >
+                    ✓
+                  </Button>
+                  <Button className="bg-red-600 w-10 h-10 rounded-full text-2xl"
+                    onClick={() => handleFriendRequestResponse(request.id, "rejected")}
+                  >
+                    X
+                  </Button>
+                </div>
+              </li>
+            </div>
           ))}
         </ul>
       </div>

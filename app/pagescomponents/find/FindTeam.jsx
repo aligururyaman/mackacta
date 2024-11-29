@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from "react";
 import { auth, db } from "@/utils/firebase";
-import { collection, query, where, getDocs, doc, setDoc, addDoc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import cityData from "../../cityData/cityData.json";
 import {
   Select,
@@ -12,16 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import TeamTable from "@/components/findTeamComp/TeamTable";
+import MatchModal from "@/components/findTeamComp/MatchModal";
 
 const capitalizeWords = (str) => {
   return str
@@ -36,18 +29,26 @@ const FindTeam = () => {
   const [searchDistrict, setSearchDistrict] = useState("");
   const [searchTeamName, setSearchTeamName] = useState("");
   const [teams, setTeams] = useState([]);
-  const [districts, setDistricts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserData, setCurrentUserData] = useState(null);
+  const [playSetMatch, setPlaySetMatch] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState(null);
+
 
   useEffect(() => {
-    if (searchCity) {
-      const selectedCity = cityData.find(
-        (city) => capitalizeWords(city.name) === searchCity
-      );
-      setDistricts(selectedCity ? selectedCity.counties.map(capitalizeWords) : []);
-    } else {
-      setDistricts([]);
-    }
-  }, [searchCity]);
+    const fetchCurrentUser = async () => {
+      const user = auth.currentUser;
+      setCurrentUser(user);
+
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setCurrentUserData(userDoc.data());
+        }
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   const handleCityDistrictSearch = async () => {
     try {
@@ -85,41 +86,11 @@ const FindTeam = () => {
     }
   };
 
-  const handleJoinRequest = async (teamId) => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Giriş yapmalısınız.");
-        return;
-      }
-
-      // Kullanıcının zaten bir takımı var mı kontrol et
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      const userData = userDoc.data();
-      if (userData.teamId) {
-        alert("Zaten bir takıma üyeyseniz başka bir takıma istek gönderemezsiniz.");
-        return;
-      }
-
-      // Takım isteklerine ekle
-      await addDoc(collection(db, "teamRequests"), {
-        teamId,
-        senderId: user.uid,
-        status: "pending",
-        timestamp: new Date(),
-      });
-
-      alert("Takım isteği gönderildi.");
-    } catch (error) {
-      console.error("İstek gönderilirken hata oluştu:", error);
-      alert("Bir hata oluştu. Lütfen tekrar deneyin.");
-    }
-  };
-
   return (
     <div className="p-5">
       <h2 className="text-lg font-bold mb-4">Takım Arama</h2>
 
+      {/* Şehir ve İlçe Arama */}
       <div className="mb-6">
         <h3>Şehir ve İlçe ile Ara</h3>
         <div className="flex items-center gap-4">
@@ -149,11 +120,13 @@ const FindTeam = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>İlçeler</SelectLabel>
-                {districts.map((district, index) => (
-                  <SelectItem key={index} value={district}>
-                    {district}
-                  </SelectItem>
-                ))}
+                {cityData
+                  .find((city) => capitalizeWords(city.name) === searchCity)
+                  ?.counties.map((district, index) => (
+                    <SelectItem key={index} value={capitalizeWords(district)}>
+                      {capitalizeWords(district)}
+                    </SelectItem>
+                  ))}
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -162,6 +135,7 @@ const FindTeam = () => {
         </div>
       </div>
 
+      {/* Takım Adı ile Arama */}
       <div className="mb-6">
         <h3>Takım Adı ile Ara</h3>
         <div className="flex items-center gap-4">
@@ -176,41 +150,21 @@ const FindTeam = () => {
         </div>
       </div>
 
-      <Table>
-        <TableCaption>Arama sonuçları</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Takım Resmi</TableHead>
-            <TableHead>Takım Adı</TableHead>
-            <TableHead>Şehir</TableHead>
-            <TableHead>İlçe</TableHead>
-            <TableHead>Kaptan</TableHead>
-            <TableHead>Telefon</TableHead>
-            <TableHead>İşlem</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {teams.map((team) => (
-            <TableRow key={team.id}>
-              <TableCell>
-                <img
-                  src={team.teamImage || "/placeholder.png"}
-                  alt="Takım Resmi"
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              </TableCell>
-              <TableCell>{capitalizeWords(team.name)}</TableCell>
-              <TableCell>{capitalizeWords(team.city)}</TableCell>
-              <TableCell>{capitalizeWords(team.district)}</TableCell>
-              <TableCell>{team.captainName || "-"}</TableCell>
-              <TableCell>{team.captainPhone || "-"}</TableCell>
-              <TableCell>
-                <Button onClick={() => handleJoinRequest(team.id)}>Ekle</Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {/* Takım Tablosu */}
+      <TeamTable
+        teams={teams}
+        currentUserData={currentUserData}
+        setPlaySetMatch={setPlaySetMatch} // Modal'ı açmak için
+        setSelectedTeamId={setSelectedTeamId} // Takım ID'sini almak için
+      />
+
+      {/* Modal */}
+      {playSetMatch && selectedTeamId && (
+        <MatchModal
+          teamId={selectedTeamId} // Seçilen takımın ID'sini gönder
+          onClose={() => setPlaySetMatch(false)} // Modal'ı kapatma işlemi
+        />
+      )}
     </div>
   );
 };

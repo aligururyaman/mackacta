@@ -3,7 +3,7 @@ import axios from "axios";
 export const uploadToCloudinary = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", "ml_default"); // Cloudinary'deki upload preset adı.
+  formData.append("upload_preset", "ml_default");
 
   try {
     const response = await axios.post(

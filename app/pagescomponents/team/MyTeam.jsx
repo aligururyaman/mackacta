@@ -7,6 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import cityData from "../../cityData/cityData.json"; // Şehir ve ilçe verileri için JSON
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 
 const capitalizeWords = (str) => {
@@ -24,9 +34,102 @@ export default function MyTeam() {
   const [members, setMembers] = useState([]);
   const [teamRequests, setTeamRequests] = useState([]);
   const [formData, setFormData] = useState({ name: "", city: "", district: "" });
-  const [teamImage, setTeamImage] = useState(null); // Takım resmi için state
+  const [districts, setDistricts] = useState([]);
+  const [teamImage, setTeamImage] = useState(null);
+  const [selectedMember, setSelectedMember] = useState(null);
 
-  // Takım ve kullanıcı verilerini çekme
+  useEffect(() => {
+    if (formData.city) {
+      const selectedCity = cityData.find(
+        (city) => capitalizeWords(city.name) === formData.city
+      );
+      setDistricts(selectedCity ? selectedCity.counties.map(capitalizeWords) : []);
+    } else {
+      setDistricts([]);
+    }
+  }, [formData.city]);
+
+  const handleCreateTeam = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      let imageUrl = null;
+
+      if (teamImage) {
+        alert("Resim yükleniyor, lütfen bekleyin...");
+        try {
+          imageUrl = await uploadToCloudinary(teamImage);
+        } catch (error) {
+          console.error("Resim yüklenirken hata oluştu:", error);
+          alert("Resim yüklenemedi, lütfen tekrar deneyin.");
+          return;
+        }
+      }
+
+      const newTeamRef = doc(collection(db, "teams"));
+      await setDoc(newTeamRef, {
+        ...formData,
+        captainId: user.uid,
+        teamImage: imageUrl || null,
+      });
+
+      await updateDoc(doc(db, "users", user.uid), { teamId: newTeamRef.id });
+      alert("Takım başarıyla oluşturuldu!");
+      fetchTeamData();
+    } catch (error) {
+      console.error("Takım oluşturulurken hata oluştu:", error);
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setTeamImage(file);
+      alert("Resim seçildi, kaydet butonuna basarak yükleyebilirsiniz.");
+    }
+  };
+
+  const handleSendFriendRequest = async (receiverId) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Giriş yapmalısınız.");
+        return;
+      }
+
+      const friendRequestRef = collection(db, "friendRequests");
+
+      const existingRequest = await getDocs(
+        query(
+          friendRequestRef,
+          where("senderId", "==", user.uid),
+          where("receiverId", "==", receiverId)
+        )
+      );
+
+      if (!existingRequest.empty) {
+        alert("Bu kullanıcıya zaten bir istek gönderdiniz.");
+        return;
+      }
+
+      await setDoc(doc(friendRequestRef), {
+        senderId: user.uid,
+        receiverId: receiverId,
+        status: "pending",
+        timestamp: new Date(),
+      });
+
+      alert("Arkadaşlık isteği gönderildi.");
+    } catch (error) {
+      console.error("Arkadaşlık isteği gönderilirken hata oluştu:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeamData();
+  }, []);
+
   const fetchTeamData = async () => {
     try {
       const user = auth.currentUser;
@@ -84,132 +187,12 @@ export default function MyTeam() {
     }
   };
 
-  const handleCreateTeam = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      let imageUrl = null;
-
-      // Resim yüklüyse Cloudinary'e yükle
-      if (teamImage) {
-        const loading = alert("Resim yükleniyor, lütfen bekleyin...");
-        try {
-          imageUrl = await uploadToCloudinary(teamImage); // Resmi yükle
-        } catch (error) {
-          console.error("Resim yüklenirken hata oluştu:", error);
-          alert("Resim yüklenemedi, lütfen tekrar deneyin.");
-          return;
-        }
-      }
-
-      const newTeamRef = doc(collection(db, "teams"));
-      await setDoc(newTeamRef, {
-        ...formData,
-        captainId: user.uid,
-        teamImage: imageUrl || null, // Yüklenen resim URL'sini ekle
-      });
-
-      await updateDoc(doc(db, "users", user.uid), { teamId: newTeamRef.id });
-      alert("Takım başarıyla oluşturuldu!");
-      fetchTeamData();
-    } catch (error) {
-      console.error("Takım oluşturulurken hata oluştu:", error);
-    }
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setTeamImage(file); // Dosyayı kaydet ama hemen yükleme
-      alert("Resim seçildi, kaydet butonuna basarak yükleyebilirsiniz.");
-    }
-  };
-
-
-  const handleDeleteTeam = async () => {
-    try {
-      if (!teamData) return;
-      const confirmation = confirm("Bu takımı silmek istediğinize emin misiniz?");
-      if (!confirmation) return;
-
-      // Takım üyelerinin `teamId`'sini null yap
-      const membersQuery = query(
-        collection(db, "users"),
-        where("teamId", "==", teamData.id)
-      );
-      const membersSnapshot = await getDocs(membersQuery);
-      for (const member of membersSnapshot.docs) {
-        await updateDoc(doc(db, "users", member.id), { teamId: null });
-      }
-
-      // Takımı sil
-      await deleteDoc(doc(db, "teams", teamData.id));
-
-      setTeamData(null);
-      setMembers([]);
-      alert("Takım başarıyla silindi.");
-    } catch (error) {
-      console.error("Takım silinirken hata oluştu:", error);
-    }
-  };
-
-
-  useEffect(() => {
-    fetchTeamData();
-  }, []);
-
-
-  const handleAcceptRequest = async (requestId, senderId) => {
-    try {
-      await updateDoc(doc(db, "users", senderId), { teamId: teamData.id });
-      await deleteDoc(doc(db, "teamRequests", requestId));
-      alert("Kullanıcı takıma eklendi.");
-      fetchTeamData();
-    } catch (error) {
-      console.error("İstek kabul edilirken hata oluştu:", error);
-    }
-  };
-
-  const handleRejectRequest = async (requestId) => {
-    try {
-      await deleteDoc(doc(db, "teamRequests", requestId));
-      alert("İstek reddedildi.");
-      fetchTeamData();
-    } catch (error) {
-      console.error("İstek reddedilirken hata oluştu:", error);
-    }
-  };
-
-
-
-
-  const handleRemovePlayer = async (playerId, playerName) => {
-    const confirmation = window.confirm(`${playerName} adlı oyuncuyu takımdan çıkarmak istediğinize emin misiniz?`);
-    if (!confirmation) return;
-
-    try {
-      await setDoc(doc(db, "users", playerId), { teamId: null }, { merge: true });
-      alert(`${playerName} takımdan çıkarıldı.`);
-      fetchTeamData(); // Takım verilerini yenileyin
-    } catch (error) {
-      console.error("Oyuncu takımdan çıkarılırken hata oluştu:", error);
-      alert("Oyuncu çıkarılamadı, lütfen tekrar deneyin.");
-    }
-  };
-
-  if (loading) {
-    return <div>Yükleniyor...</div>;
-  }
-
-
   return (
     <div>
       {!teamData ? (
         <div>
           <h2 className="text-lg font-bold">Takımınız yok</h2>
           <p>Takım oluşturmak için TAKIM KUR seçeneğini kullanabilirsiniz.</p>
-
           <Sheet>
             <SheetTrigger asChild>
               <Button>Takım Kur</Button>
@@ -226,17 +209,46 @@ export default function MyTeam() {
                   placeholder="Takım adı girin"
                 />
                 <Label>Şehir:</Label>
-                <Input
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="Şehir girin"
-                />
+                <Select
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({ ...prev, city: value, district: "" }));
+                  }}
+                >
+                  <SelectTrigger className="w-full max-w-xs">
+                    <SelectValue placeholder="Şehir Seç" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Şehirler</SelectLabel>
+                      {cityData.map((city) => (
+                        <SelectItem key={city.name} value={capitalizeWords(city.name)}>
+                          {capitalizeWords(city.name)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 <Label>İlçe:</Label>
-                <Input
-                  value={formData.district}
-                  onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                  placeholder="İlçe girin"
-                />
+                <Select
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, district: value }))
+                  }
+                  disabled={!formData.city}
+                >
+                  <SelectTrigger className="w-full max-w-xs mt-4">
+                    <SelectValue placeholder="İlçe Seç" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>İlçeler</SelectLabel>
+                      {districts.map((district, index) => (
+                        <SelectItem key={index} value={district}>
+                          {district}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 <Label>Takım Resmi:</Label>
                 <Input type="file" accept="image/*" onChange={handleImageUpload} />
               </div>
@@ -249,21 +261,22 @@ export default function MyTeam() {
       ) : (
         <div>
           <h2 className="text-lg font-bold">Takımım</h2>
-          <div className="p-4 border rounded-md">
+          <div className="p-4 flex flex-col items-center justify-center">
             <img
               src={teamData.teamImage || "/placeholder.png"}
               alt="Takım Resmi"
               className="w-32 h-32 rounded-md object-cover"
             />
-            <p><strong>Takım Adı:</strong> {teamData.name}</p>
-            <p><strong>Şehir:</strong> {teamData.city}</p>
-            <p><strong>İlçe:</strong> {teamData.district}</p>
+            <div className="flex flex-col items-center">
+              <p className="text-4xl font-black">{teamData.name}</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <p className="text-lg font-light">{teamData.city}</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <p className="text-lg font-light">{teamData.district}</p>
+            </div>
           </div>
-          {teamData.captainId === auth.currentUser?.uid && (
-            <Button variant="destructive" onClick={handleDeleteTeam}>
-              Takımı Sil
-            </Button>
-          )}
 
 
           {teamRequests.length > 0 && (
@@ -288,55 +301,94 @@ export default function MyTeam() {
               </ul>
             </div>
           )}
-
           {members.length > 0 && (
-            <div className="mt-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Profil Resmi</TableHead>
-                    <TableHead>Ad</TableHead>
-                    <TableHead>Telefon</TableHead>
-                    <TableHead>İl</TableHead>
-                    <TableHead>İlçe</TableHead>
-                    <TableHead>Durum</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {members
-                    .sort((a, b) => (a.id === teamData.captainId ? -1 : b.id === teamData.captainId ? 1 : 0))
-                    .map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <img
-                            src={member.profileImage || "/placeholder.png"}
-                            alt="Profil Resmi"
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {capitalizeWords(member.name)} {capitalizeWords(member.surname)}
-                        </TableCell>
-                        <TableCell>{member.phone || "Belirtilmemiş"}</TableCell>
-                        <TableCell>{capitalizeWords(member.city)}</TableCell>
-                        <TableCell>{capitalizeWords(member.district)}</TableCell>
-                        <TableCell>
-                          {member.id === teamData.captainId ? (
-                            <span className="text-green-500 font-bold">Kaptan</span>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              onClick={() => handleRemovePlayer(member.id, member.name)}
-                            >
-                              Oyuncuyu At
-                            </Button>
-                          )}
-                        </TableCell>
+            <div>
+              <h2 className="text-lg font-bold">Takımım</h2>
+              {members.length > 0 && (
+                <div className="mt-6">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Profil Resmi</TableHead>
+                        <TableHead>Ad</TableHead>
+                        <TableHead>Telefon</TableHead>
+                        <TableHead>İl</TableHead>
+                        <TableHead>İlçe</TableHead>
                       </TableRow>
-                    ))}
-                </TableBody>
+                    </TableHeader>
+                    <TableBody>
+                      {members
+                        .sort((a, b) => (a.id === teamData.captainId ? -1 : b.id === teamData.captainId ? 1 : 0)).map((member) => (
+                          <TableRow
+                            key={member.id}
+                            onClick={() => setSelectedMember(member)}
+                            className="cursor-pointer"
+                          >
+                            <TableCell>
+                              <img
+                                src={member.profileImage || "/placeholder.png"}
+                                alt="Profil Resmi"
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {capitalizeWords(member.name)} {capitalizeWords(member.surname)}
+                            </TableCell>
+                            <TableCell>{member.phone || "Belirtilmemiş"}</TableCell>
+                            <TableCell>{capitalizeWords(member.city)}</TableCell>
+                            <TableCell>{capitalizeWords(member.district)}</TableCell>
+                            <TableCell>
+                              {member.id === teamData.captainId ? (
+                                <span className="text-green-500 font-bold">Kaptan</span>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  onClick={() => handleRemovePlayer(member.id, member.name)}
+                                >
+                                  Oyuncuyu At
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
 
-              </Table>
+              {/* Sheet for Selected Member */}
+              {selectedMember && (
+                <Sheet open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>{capitalizeWords(selectedMember.name)} {capitalizeWords(selectedMember.surname)}</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4 flex flex-col items-center">
+                      <img
+                        src={selectedMember.profileImage || "/placeholder.png"}
+                        alt="Profil Resmi"
+                        className="w-32 h-32 rounded-full object-cover"
+                      />
+                      <p><strong>Telefon:</strong> {selectedMember.phone || "Bilgi Yok"}</p>
+                      <p><strong>İl:</strong> {capitalizeWords(selectedMember.city)}</p>
+                      <p><strong>İlçe:</strong> {capitalizeWords(selectedMember.district)}</p>
+                      <p><strong>Mevki:</strong> {selectedMember.position || "Bilgi Yok"}</p>
+                    </div>
+                    {auth.currentUser.uid === selectedMember.id ? (
+                      <p className="mt-4 text-blue-500"></p>
+                    ) : (
+                      <div className="mt-4 flex items-center justify-center">
+                        <Button
+                          disabled={selectedMember.isFriend} // Eğer arkadaşsa buton devre dışı
+                          onClick={() => handleSendFriendRequest(selectedMember.id)}
+                        >
+                          {selectedMember.isFriend ? "Arkadaşsınız" : "Arkadaş Ekle"}
+                        </Button>
+                      </div>
+                    )}
+                  </SheetContent>
+                </Sheet>
+              )}
             </div>
           )}
         </div>

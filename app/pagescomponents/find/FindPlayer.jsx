@@ -227,7 +227,7 @@ const FindPlayer = () => {
 
       <ul className="max-w-2xl mx-auto w-full gap-4">
         {users.map((user, index) => (
-          <div className="p-4 flex flex-col md:flex-row justify-between items-center hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl">
+          <div key={user.id} className="p-4 flex flex-col md:flex-row justify-between items-center hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl">
             <motion.div
               layoutId={`card-${user.name}-${id}`}
               key={`card-${user.name}-${id}`}

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { getFirestore, collection, query, where, getDocs, addDoc } from "firebase/firestore";
 import cityData from "../../cityData/cityData.json";
 import {
@@ -11,17 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/utils/firebase";
+import { AnimatePresence, motion } from "framer-motion";
+import { useOutsideClick } from "@/hooks/use-outside-click";
+
+
 
 // Helper function to capitalize the first letter of each word
 const capitalizeWords = (str) => {
@@ -39,6 +34,10 @@ const FindPlayer = () => {
   const [searchSurname, setSearchSurname] = useState("");
   const [users, setUsers] = useState([]);
   const [districts, setDistricts] = useState([]);
+  const [active, setActive] = useState(null);
+  const ref = useRef(null);
+  const id = useId();
+
 
   const db = getFirestore();
 
@@ -137,6 +136,26 @@ const FindPlayer = () => {
     }
   };
 
+  useEffect(() => {
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        setActive(false);
+      }
+    }
+
+    if (active && typeof active === "object") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active]);
+
+  useOutsideClick(ref, () => setActive(null));
+
+
 
   return (
     <div className="flex flex-row p-5">
@@ -205,52 +224,105 @@ const FindPlayer = () => {
         </div>
       </div>
 
-      <div className="flex-1 ml-10">
-        <Table>
-          <TableCaption>Arama sonuçları</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Profil Resmi</TableHead>
-              <TableHead>Ad</TableHead>
-              <TableHead>Soyad</TableHead>
-              <TableHead>Şehir</TableHead>
-              <TableHead>İlçe</TableHead>
-              <TableHead>Telefon</TableHead>
-              <TableHead>Pozisyon</TableHead>
-              <TableHead>İşlem</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
+
+      <ul className="max-w-2xl mx-auto w-full gap-4">
+        {users.map((user, index) => (
+          <div className="p-4 flex flex-col md:flex-row justify-between items-center hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl">
+            <motion.div
+              layoutId={`card-${user.name}-${id}`}
+              key={`card-${user.name}-${id}`}
+              onClick={() => setActive(user)}
+              className="flex w-screen cursor-pointer"
+            >
+              <div className="flex gap-4 flex-col md:flex-row ">
+                <motion.div layoutId={`image-${user.name}-${id}`}>
                   <img
-                    src={user.profileImage || "/placeholder.png"}
-                    alt="Profil Resmi"
                     className="w-10 h-10 rounded-full bg-gray-300 object-cover"
+                    src={user.profileImage}
+                    alt="profil resmi"
                   />
-                </TableCell>
-                <TableCell>{capitalizeWords(user.name)}</TableCell>
-                <TableCell>{capitalizeWords(user.surname)}</TableCell>
-                <TableCell>{capitalizeWords(user.city)}</TableCell>
-                <TableCell>{capitalizeWords(user.district)}</TableCell>
-                <TableCell>{user.phone || "-"}</TableCell>
-                <TableCell>{capitalizeWords(user.position || "Bilinmiyor")}</TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => handleSendFriendRequest(user.id)}
-                    disabled={user.id === auth.currentUser?.uid} // Kendine istek gönderemezsin
-                  >
-                    Ekle
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                </motion.div>
+                <div className="">
+                  <motion.h3
+                    layoutId={`title-${user.name}-${id}`}
+                    className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left">
+                    {user.name}
+                  </motion.h3>
+                  <motion.p
+                    layoutId={`description-${user.name}-${id}`}
+                    className="text-neutral-600 dark:text-neutral-400 text-center md:text-left">
+                    {user.surname}
+                  </motion.p>
+                </div>
+              </div>
+
+            </motion.div>
+            <motion.button
+              layoutId={`button-${user.name}-${id}`}
+              className="px-4 w-full py-2 text-sm rounded-full font-bold bg-gray-200 hover:bg-green-500 hover:text-white text-black mt-4 md:mt-0"
+              onClick={() => handleSendFriendRequest(user.id)}
+              disabled={user.id === auth.currentUser?.uid}
+            >
+              Arkadaş Ekle
+            </motion.button>
+          </div>
+        ))}
+
+      </ul>
+
+
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              ref={ref}
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white dark:bg-neutral-800 p-6 rounded-lg w-96 flex flex-col items-center gap-1"
+            >
+              <img
+                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                src={active.profileImage}
+                alt="Profil Resmi"
+              />
+              <div className="flex flex-col items-center my-2">
+                <p>{active.name} {active.surname}</p>
+                <p> {active.phone || "Belirtilmemiş"}</p>
+                <p> {active.position || "Belirtilmemiş"}</p>
+              </div>
+
+              <motion.button
+                layoutId={`button-${active.name}-${id}`}
+                className="px-4 w-full py-2 text-sm rounded-full font-bold bg-gray-100 hover:bg-green-500 hover:text-white text-black mt-4 md:mt-0"
+                onClick={() => handleSendFriendRequest(active.id)}
+                disabled={active.id === auth.currentUser?.uid}
+              >
+                Arkadaş Ekle
+              </motion.button>
+              <Button className="mt-4 w-full hover:bg-green-500" onClick={() => setActive(null)}>
+                Kapat
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };
 
 export default FindPlayer;
+
+
+
+
+
+
+
+

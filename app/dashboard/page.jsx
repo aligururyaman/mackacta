@@ -73,7 +73,7 @@ export default function Dashboard() {
     <SidebarProvider>
       <AppSidebar onSelectMenu={handleMenuSelect} />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-slate-100">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-green-300">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb >
@@ -83,15 +83,23 @@ export default function Dashboard() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block font-semibold" />
               <BreadcrumbItem>
-                <BreadcrumbPage>{selectedSubItem || "Alt Menü"}</BreadcrumbPage>
+                <BreadcrumbPage>{selectedSubItem}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          {/* Dinamik içerik render ediliyor */}
-          {renderContent()}
+        <div className="flex flex-1 flex-col gap-4 p-4 bg-green-100 relative">
+          <div className="absolute inset-0 flex items-center justify-center z-9">
+            <div className="absolute w-full h-1 bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute w-72 h-72 border-4 border-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute w-6 h-6 bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+          </div>
+          <div className="relative z-10">
+            {renderContent()}
+          </div>
         </div>
+
+
       </SidebarInset>
     </SidebarProvider>
   );

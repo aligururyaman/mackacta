@@ -37,6 +37,7 @@ export default function MyTeam() {
   const [districts, setDistricts] = useState([]);
   const [teamImage, setTeamImage] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [openNotification, setOpenNotification] = useState(null);
 
   useEffect(() => {
     if (formData.city) {
@@ -186,6 +187,59 @@ export default function MyTeam() {
       setLoading(false);
     }
   };
+  const handleAcceptRequest = async (requestId, senderId) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      // İstek durumunu 'accepted' olarak güncelle
+      await updateDoc(doc(db, "teamRequests", requestId), {
+        status: "accepted",
+      });
+
+      // İstek gönderen kullanıcıyı takım üyelerine ekle
+      await updateDoc(doc(db, "users", senderId), {
+        teamId: teamData.id,
+      });
+
+      alert("İstek kabul edildi.");
+      fetchTeamData(); // Verileri tekrar yükle
+    } catch (error) {
+      console.error("İstek kabul edilirken hata oluştu:", error);
+    }
+  };
+
+  const handleRejectRequest = async (requestId) => {
+    try {
+      // İsteği sil
+      await deleteDoc(doc(db, "teamRequests", requestId));
+      alert("İstek reddedildi.");
+      fetchTeamData(); // Verileri tekrar yükle
+    } catch (error) {
+      console.error("İstek reddedilirken hata oluştu:", error);
+    }
+  };
+
+  const handleRemovePlayer = async (memberId, memberName) => {
+    try {
+      const confirmation = window.confirm(
+        `${memberName} oyuncusunu takımdan çıkarmak istediğinize emin misiniz?`
+      );
+      if (!confirmation) return;
+
+      // Kullanıcının `teamId` bilgisini null yap
+      await updateDoc(doc(db, "users", memberId), {
+        teamId: null,
+      });
+
+      alert(`${memberName} oyuncusu takımdan çıkarıldı.`);
+      fetchTeamData(); // Verileri güncelle
+    } catch (error) {
+      console.error("Oyuncu takımdan çıkarılırken hata oluştu:", error);
+      alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+    }
+  };
+
 
   return (
     <div>
@@ -259,48 +313,77 @@ export default function MyTeam() {
           </Sheet>
         </div>
       ) : (
-        <div>
-          <h2 className="text-lg font-bold">Takımım</h2>
-          <div className="p-4 flex flex-col items-center justify-center">
-            <img
-              src={teamData.teamImage || "/placeholder.png"}
-              alt="Takım Resmi"
-              className="w-32 h-32 rounded-md object-cover"
-            />
-            <div className="flex flex-col items-center">
-              <p className="text-4xl font-black">{teamData.name}</p>
+        <div className="flex flex-col">
+          <div className="flex items-center justify-center">
+
+            <div className="p-4 flex flex-col items-center justify-center bg-green-200 w-[40%] rounded-xl border-2 border-green-300 shadow-xl relative">
+              {teamRequests.length > 0 && auth.currentUser?.uid === teamData?.captainId && (
+                <div
+                  key={teamRequests}
+                  className="flex h-10 w-10 absolute top-[-10px] right-[-10px] rounded-full bg-red-500 justify-center items-center cursor-pointer"
+                  onClick={() => setOpenNotification(true)} // Bildirim panelini aç
+                >
+                  <p className="font-bold text-2xl text-white">{teamRequests.length}</p>
+                </div>
+              )}
+
+
+              {/* Bildirim Paneli */}
+              <Sheet open={openNotification} onOpenChange={setOpenNotification}>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Takıma Katılma İstekleri</SheetTitle>
+                  </SheetHeader>
+                  <ul>
+                    {teamRequests.map((request) => (
+                      <li
+                        key={request.id}
+                        className="flex justify-between items-center mt-4 p-2 border-2 rounded-md"
+                      >
+                        <span>
+                          <strong>{request.senderName} {request.senderSurname}</strong> takıma katılmak istiyor.
+                        </span>
+                        <div>
+                          <Button
+                            className="mr-2"
+                            onClick={() => handleAcceptRequest(request.id, request.senderId)}
+                          >
+                            Kabul Et
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleRejectRequest(request.id)}
+                          >
+                            Reddet
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </SheetContent>
+              </Sheet>
+
+              <img
+                src={teamData.teamImage}
+                alt="Takım Resmi"
+                className="w-32 h-32 rounded-full object-cover border-2 border-green-400 shadow-xl"
+              />
+              <div className="flex flex-col items-center">
+                <p className="text-4xl font-black">{teamData.name}</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <p className="text-lg font-light">{teamData.city}</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <p className="text-lg font-light">{teamData.district}</p>
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <p className="text-lg font-light">{teamData.city}</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <p className="text-lg font-light">{teamData.district}</p>
-            </div>
+
+
           </div>
 
 
-          {teamRequests.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-bold">Gelen İstekler</h3>
-              <ul>
-                {teamRequests.map((request) => (
-                  <li key={request.id} className="flex justify-between items-center mt-4 p-2 border rounded-md">
-                    <span>
-                      <strong>{request.senderName} {request.senderSurname}</strong> takıma katılmak istiyor.
-                    </span>
-                    <div>
-                      <Button className="mr-2" onClick={() => handleAcceptRequest(request.id, request.senderId)}>
-                        Kabul Et
-                      </Button>
-                      <Button variant="destructive" onClick={() => handleRejectRequest(request.id)}>
-                        Reddet
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+
           {members.length > 0 && (
             <div>
               <h2 className="text-lg font-bold">Takımım</h2>

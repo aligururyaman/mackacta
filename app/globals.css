@@ -10,39 +10,20 @@
     --font-poppins-light: "Poppins-Light", sans-serif;
     --font-poppins-semi-bold: "Poppins-SemiBold", sans-serif;
 
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --ring: 0 0% 3.9%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --background: 210, 100%, 96%; /* Açık bir arka plan rengi */
+    --foreground: 210, 100%, 10%; /* Koyu bir yazı rengi */
+    --primary: 220, 90%, 56%; /* Ana renk */
+    --secondary: 340, 82%, 52%; /* İkincil renk */
+    --muted: 210, 25%, 80%; /* Pastel bir renk */
+    --card: 0, 0%, 100%; /* Beyaz kart rengi */
+    --border: 210, 20%, 90%; /* Açık bir sınır rengi */
+    --input: 210, 20%, 95%; /* Açık bir input rengi */
+    --ring: 220, 90%, 60%; /* Odak halkası rengi */
+    --chart-1: 120, 100%, 50%;
+    --chart-2: 60, 100%, 50%;
+    --chart-3: 30, 100%, 50%;
+    --chart-4: 0, 100%, 50%;
+    --chart-5: 300, 100%, 50%;
   }
 
   .dark {

@@ -95,10 +95,10 @@ const FindTeam = () => {
         <h3>Şehir ve İlçe ile Ara</h3>
         <div className="flex items-center gap-4">
           <Select onValueChange={(value) => setSearchCity(value)}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 bg-green-300 rounded-xl">
               <SelectValue placeholder="Şehir Seç" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-green-300 rounded-xl">
               <SelectGroup>
                 <SelectLabel>Şehirler</SelectLabel>
                 {cityData.map((city) => (
@@ -113,17 +113,18 @@ const FindTeam = () => {
           <Select
             onValueChange={(value) => setSearchDistrict(value)}
             disabled={!searchCity}
+
           >
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 bg-green-300 rounded-xl">
               <SelectValue placeholder="İlçe Seç" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-green-300 rounded-xl">
               <SelectGroup>
                 <SelectLabel>İlçeler</SelectLabel>
                 {cityData
                   .find((city) => capitalizeWords(city.name) === searchCity)
                   ?.counties.map((district, index) => (
-                    <SelectItem key={index} value={capitalizeWords(district)}>
+                    <SelectItem key={index} value={capitalizeWords(district)}  >
                       {capitalizeWords(district)}
                     </SelectItem>
                   ))}
@@ -136,13 +137,13 @@ const FindTeam = () => {
       </div>
 
       {/* Takım Adı ile Arama */}
-      <div className="mb-6">
+      <div className="mb-6 ">
         <h3>Takım Adı ile Ara</h3>
         <div className="flex items-center gap-4">
           <input
             type="text"
             placeholder="Takım Adı"
-            className="w-40 p-2 border rounded"
+            className="w-40 p-2 border rounded-xl bg-green-300"
             value={searchTeamName}
             onChange={(e) => setSearchTeamName(e.target.value)}
           />
@@ -151,19 +152,25 @@ const FindTeam = () => {
       </div>
 
       {/* Takım Tablosu */}
+
+
       <TeamTable
         teams={teams}
         currentUserData={currentUserData}
-        setPlaySetMatch={setPlaySetMatch} // Modal'ı açmak için
-        setSelectedTeamId={setSelectedTeamId} // Takım ID'sini almak için
+        setPlaySetMatch={setPlaySetMatch}
+        setSelectedTeamId={setSelectedTeamId}
+        db={db} // Firestore bağlantısını gönderiyoruz
       />
+
 
       {/* Modal */}
       {playSetMatch && selectedTeamId && (
         <MatchModal
-          teamId={selectedTeamId} // Seçilen takımın ID'sini gönder
-          onClose={() => setPlaySetMatch(false)} // Modal'ı kapatma işlemi
+          teamId={selectedTeamId} // Seçilen takımın ID'si
+          onClose={() => setPlaySetMatch(false)} // Modal'ı kapatma
+          db={db} // Firestore bağlantısı
         />
+
       )}
     </div>
   );

@@ -23,8 +23,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { GalleryVerticalEnd, Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import UserInfo from "@/app/pagescomponents/profile/UserInfo";
+import logo from "@/app/assets/logo/logo.png"
+import Image from "next/image";
 
 const data = {
   navMain: [
@@ -88,23 +90,26 @@ export function AppSidebar({ onSelectMenu, ...props }) {
   };
 
   const goProfile = () => {
-    setShowProfile(true); // Profil bileşenini aç
+    setShowProfile(true);
   };
 
-  if (loading) {
-    return <div>Yükleniyor...</div>; // Yükleniyor ekranı
-  }
 
   return (
     <>
-      <Sidebar {...props} className="bg-slate-100">
+      <Sidebar {...props} className="bg-green-300">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
                 <div>
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <GalleryVerticalEnd className="size-4" />
+                  <div className="flex aspect-square  items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <Image
+                      className="w-12 h-12 rounded-full bg-green-300 object-none"
+                      src={logo}
+                      alt="profil resmi"
+                      width={40}
+                      height={40}
+                    />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
                     <span className="font-semibold">Maç Kaçta</span>
@@ -172,10 +177,17 @@ export function AppSidebar({ onSelectMenu, ...props }) {
           </SidebarMenuItem>
         </SidebarMenu>
       </Sidebar>
-
       {showProfile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          role="dialog"
+          aria-labelledby="profile-modal-title"
+          aria-modal="true"
+        >
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
+            <h2 id="profile-modal-title" className="text-lg font-bold">
+              Kullanıcı Bilgileri
+            </h2>
             <UserInfo />
             <Button variant="secondary" onClick={() => setShowProfile(false)}>
               Kapat
@@ -183,6 +195,7 @@ export function AppSidebar({ onSelectMenu, ...props }) {
           </div>
         </div>
       )}
+
     </>
   );
 }

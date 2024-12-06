@@ -164,10 +164,10 @@ const FindPlayer = () => {
           <h3>Şehir ve İlçe ile Ara</h3>
 
           <Select onValueChange={(value) => setSearchCity(value)}>
-            <SelectTrigger className="w-full max-w-xs">
+            <SelectTrigger className="w-full max-w-xs bg-green-300 rounded-xl">
               <SelectValue placeholder="Şehir Seç" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-green-300 rounded-xl">
               <SelectGroup>
                 <SelectLabel>Şehirler</SelectLabel>
                 {cityData.map((city) => (
@@ -183,10 +183,10 @@ const FindPlayer = () => {
             onValueChange={(value) => setSearchDistrict(value)}
             disabled={!searchCity}
           >
-            <SelectTrigger className="w-full max-w-xs mt-4">
+            <SelectTrigger className="w-full max-w-xs mt-4 bg-green-300 rounded-xl">
               <SelectValue placeholder="İlçe Seç" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-green-300 rounded-xl">
               <SelectGroup>
                 <SelectLabel>İlçeler</SelectLabel>
                 {districts.map((district, index) => (
@@ -207,14 +207,14 @@ const FindPlayer = () => {
           <input
             type="text"
             placeholder="Ad"
-            className="block w-full max-w-xs mt-2 p-2 border rounded"
+            className="block w-full max-w-xs mt-2 p-2 border bg-green-300 rounded-xl"
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
           />
           <input
             type="text"
             placeholder="Soyad"
-            className="block w-full max-w-xs mt-2 p-2 border rounded"
+            className="block w-full max-w-xs mt-2 p-2 border bg-green-300 rounded-xl"
             value={searchSurname}
             onChange={(e) => setSearchSurname(e.target.value)}
           />

@@ -70,6 +70,22 @@ const FindTeam = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const user = auth.currentUser;
+      setCurrentUser(user);
+
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setCurrentUserData({ ...userDoc.data(), id: user.uid });
+        }
+      }
+    };
+    fetchCurrentUser();
+  }, []);
+
+
   const handleTeamNameSearch = async () => {
     try {
       const teamsRef = collection(db, "teams");

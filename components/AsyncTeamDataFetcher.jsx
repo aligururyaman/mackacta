@@ -56,7 +56,7 @@ const AsyncTeamDataFetcher = ({ teamId }) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Takım Resmi</TableHead>
+            <TableHead className="w-[100px]">Resim</TableHead>
             <TableHead>Takım Adı</TableHead>
             <TableHead>Kaptan Adı</TableHead>
             <TableHead className="text-right">Tel No:</TableHead>

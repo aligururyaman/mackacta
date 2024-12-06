@@ -61,6 +61,7 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
 
 
 
+
   return (
     <Table>
       <TableCaption>Arama sonuçları</TableCaption>
@@ -98,8 +99,7 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
                   <IoPersonAdd />
                   Takıma Katıl
                 </Button>
-              ) : currentUserData?.teamId === team.id && currentUserData?.id === team.captainId ? (
-                // Kullanıcı takımın kaptanıysa "Maç Ayarla" düğmesi
+              ) : currentUserData?.teamId !== team.id ? (
                 <Button
                   className="min-w-min justify-center items-center text-sm px-2 py-1"
                   onClick={() => handleMatchSetup(team.id)}
@@ -107,7 +107,7 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
                   <LuSwords />
                   Maç Ayarla
                 </Button>
-              ) : null /* Kullanıcı bir takıma üyeyse hiçbir şey gösterme */}
+              ) : null/* Kullanıcı bir takıma üyeyse hiçbir şey gösterme */}
             </TableCell>
           </TableRow>
         ))}

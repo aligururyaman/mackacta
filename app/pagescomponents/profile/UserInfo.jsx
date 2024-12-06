@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import cityData from "../../cityData/cityData.json";
 import {
   Sheet,
   SheetClose,
@@ -16,6 +17,26 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const capitalizeWords = (str) => {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+
+
 
 export default function UserInfo() {
   const [userData, setUserData] = useState(null);
@@ -23,6 +44,8 @@ export default function UserInfo() {
   const [editMode, setEditMode] = useState(false); // Düzenleme modu
   const [friendRequests, setFriendRequests] = useState([]);
   const [teamData, setTeamData] = useState(null); // Takım bilgisi için state
+  const [searchCity, setSearchCity] = useState("");
+  const [districts, setDistricts] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -31,6 +54,17 @@ export default function UserInfo() {
     district: "",
     position: "",
   });
+
+  useEffect(() => {
+    if (formData.city) {
+      const selectedCity = cityData.find(
+        (city) => capitalizeWords(city.name) === formData.city
+      );
+      setDistricts(selectedCity ? selectedCity.counties.map(capitalizeWords) : []);
+    } else {
+      setDistricts([]);
+    }
+  }, [formData.city]);
 
 
   useEffect(() => {
@@ -161,18 +195,27 @@ export default function UserInfo() {
     try {
       const user = auth.currentUser;
       if (user) {
-        await setDoc(doc(db, "users", user.uid), formData);
-        setUserData(formData);
-        setEditMode(false); // Kaydettikten sonra düzenleme modundan çık
+        // Yalnızca düzenlenebilir alanları güncelle
+        const updatedData = {
+          name: formData.name,
+          surname: formData.surname,
+          phone: formData.phone,
+          city: formData.city,
+          district: formData.district,
+          position: formData.position,
+        };
+
+        await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
+
+        // Kullanıcı verilerini güncel haliyle set edin
+        setUserData((prev) => ({ ...prev, ...updatedData }));
+        setEditMode(false); // Düzenleme modundan çık
       }
     } catch (error) {
       console.error("Bilgiler kaydedilirken hata oluştu:", error);
     }
   };
 
-  if (loading) {
-    return <div>Yükleniyor...</div>;
-  }
 
   return (
     <div className="p-10 font-poppinsLight">
@@ -218,7 +261,32 @@ export default function UserInfo() {
 
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline">Düzenle</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              // Formu userData ile doldur
+              setFormData({
+                name: userData?.name || "",
+                surname: userData?.surname || "",
+                phone: userData?.phone || "",
+                city: userData?.city || "",
+                district: userData?.district || "",
+                position: userData?.position || "",
+              });
+
+              // Eğer şehir seçilmişse ilçeleri güncelle
+              if (userData?.city) {
+                const selectedCity = cityData.find(
+                  (city) => capitalizeWords(city.name) === userData.city
+                );
+                setDistricts(
+                  selectedCity ? selectedCity.counties.map(capitalizeWords) : []
+                );
+              }
+            }}
+          >
+            Düzenle
+          </Button>
         </SheetTrigger>
         <SheetContent>
           <SheetHeader>
@@ -257,22 +325,59 @@ export default function UserInfo() {
             </div>
             <div>
               <Label>Şehir:</Label>
-              <Input
-                type="text"
-                placeholder="Şehriniz"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              />
+              <Select
+                onValueChange={(value) => {
+                  setFormData({ ...formData, city: value, district: "" });
+
+                  // İlçe listesini güncelle
+                  const selectedCity = cityData.find(
+                    (city) => capitalizeWords(city.name) === value
+                  );
+                  setDistricts(
+                    selectedCity ? selectedCity.counties.map(capitalizeWords) : []
+                  );
+                }}
+              >
+                <SelectTrigger className="w-full max-w-xs bg-green-300 rounded-xl">
+                  <SelectValue placeholder={formData.city || "Şehir Seç"} />
+                </SelectTrigger>
+                <SelectContent className="bg-green-300 rounded-xl">
+                  <SelectGroup>
+                    <SelectLabel>Şehirler</SelectLabel>
+                    {cityData.map((city) => (
+                      <SelectItem key={city.name} value={capitalizeWords(city.name)}>
+                        {capitalizeWords(city.name)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
+
             <div>
               <Label>İlçe:</Label>
-              <Input
-                type="text"
-                placeholder="İlçeniz"
-                value={formData.district}
-                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-              />
+              <Select
+                onValueChange={(value) =>
+                  setFormData({ ...formData, district: value })
+                }
+                disabled={!formData.city} // Şehir seçilmeden ilçe seçilemesin
+              >
+                <SelectTrigger className="w-full max-w-xs mt-4 bg-green-300 rounded-xl">
+                  <SelectValue placeholder={formData.district || "İlçe Seç"} />
+                </SelectTrigger>
+                <SelectContent className="bg-green-300 rounded-xl">
+                  <SelectGroup>
+                    <SelectLabel>İlçeler</SelectLabel>
+                    {districts.map((district, index) => (
+                      <SelectItem key={index} value={district}>
+                        {district}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
+
             <div>
               <Label>Mevki:</Label>
               <Input
@@ -285,11 +390,14 @@ export default function UserInfo() {
           </form>
           <SheetFooter>
             <SheetClose asChild>
-              <Button type="submit" onClick={handleSave}>Save changes</Button>
+              <Button type="submit" onClick={handleSave}>
+                Kaydet
+              </Button>
             </SheetClose>
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
       <div>
         <ul>
           {friendRequests.map((request) => (

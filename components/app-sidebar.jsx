@@ -63,7 +63,6 @@ const data = {
 export function AppSidebar({ onSelectMenu, ...props }) {
   const [userEmail, setUserEmail] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showProfile, setShowProfile] = useState(false); // Profil bileşeni için durum
   const router = useRouter();
   const auth = getAuth();
 
@@ -87,10 +86,6 @@ export function AppSidebar({ onSelectMenu, ...props }) {
     } catch (error) {
       console.error("Çıkış hatası:", error.message);
     }
-  };
-
-  const goProfile = () => {
-    setShowProfile(true);
   };
 
 
@@ -165,9 +160,6 @@ export function AppSidebar({ onSelectMenu, ...props }) {
             <SidebarMenuButton size="lg" asChild>
               <div className="flex justify-center h-20">
                 <div className="flex flex-col h-12 leading-none">
-                  <span onClick={goProfile} className="font-semibold cursor-pointer">
-                    {userEmail}
-                  </span>
                   <Button variant="link" onClick={handleSignOut}>
                     Çıkış Yap
                   </Button>
@@ -177,25 +169,6 @@ export function AppSidebar({ onSelectMenu, ...props }) {
           </SidebarMenuItem>
         </SidebarMenu>
       </Sidebar>
-      {showProfile && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          role="dialog"
-          aria-labelledby="profile-modal-title"
-          aria-modal="true"
-        >
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
-            <h2 id="profile-modal-title" className="text-lg font-bold">
-              Kullanıcı Bilgileri
-            </h2>
-            <UserInfo />
-            <Button variant="secondary" onClick={() => setShowProfile(false)}>
-              Kapat
-            </Button>
-          </div>
-        </div>
-      )}
-
     </>
   );
 }

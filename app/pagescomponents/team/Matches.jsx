@@ -1,15 +1,25 @@
 'use client';
 import { useState, useEffect } from "react";
 import { auth, db } from "@/utils/firebase";
-import { collection, query, where, getDocs, updateDoc, deleteDoc, doc, getDoc, addDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  addDoc,
+} from "firebase/firestore";
 import ScheduledMatches from "@/components/matchesComp/ScheduledMatches";
-
 
 const Matches = () => {
   const [userId, setUserId] = useState(null);
   const [teamData, setTeamData] = useState(null);
   const [requests, setRequests] = useState([]);
-  const [upcomingMatches, setUpcomingMatches] = useState([]);
+  const [pastMatches, setPastMatches] = useState([]);
+  const [futureMatches, setFutureMatches] = useState([]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -53,25 +63,16 @@ const Matches = () => {
       try {
         const requestsQuery = query(
           collection(db, "matchRequests"),
-          where("receiverTeamId", "==", teamData.id), // Gelen istekler
+          where("receiverTeamId", "==", teamData.id),
           where("status", "==", "pending")
         );
 
-        const sentRequestsQuery = query(
-          collection(db, "matchRequests"),
-          where("senderTeamId", "==", teamData.id), // Gönderilen istekler
-          where("status", "==", "pending")
-        );
+        const receivedSnapshot = await getDocs(requestsQuery);
 
-        const [receivedSnapshot, sentSnapshot] = await Promise.all([
-          getDocs(requestsQuery),
-          getDocs(sentRequestsQuery),
-        ]);
-
-        const allRequests = [
-          ...receivedSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-          ...sentSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-        ];
+        const allRequests = receivedSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
         setRequests(allRequests);
       } catch (error) {
@@ -81,14 +82,19 @@ const Matches = () => {
 
     const fetchScheduledMatches = async () => {
       try {
+        if (!teamData || !teamData.id) return;
+
+        const currentDate = new Date();
+
+        // Sadece kullanıcının takımına ait maçları al
         const receivedMatchesQuery = query(
           collection(db, "matches"),
-          where("receiverTeamId", "==", teamData.id) // Alıcı olan maçlar
+          where("receiverTeamId", "==", teamData.id) // Kullanıcının takımı alıcıysa
         );
 
         const sentMatchesQuery = query(
           collection(db, "matches"),
-          where("senderTeamId", "==", teamData.id) // Gönderen olan maçlar
+          where("senderTeamId", "==", teamData.id) // Kullanıcının takımı gönderense
         );
 
         const [receivedSnapshot, sentSnapshot] = await Promise.all([
@@ -101,11 +107,21 @@ const Matches = () => {
           ...sentSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
         ];
 
-        setUpcomingMatches(allMatches);
+        // Maçları geçmiş ve gelecekteki olarak ayır
+        const past = allMatches.filter(
+          (match) => new Date(match.date.seconds * 1000) < currentDate
+        );
+        const future = allMatches.filter(
+          (match) => new Date(match.date.seconds * 1000) >= currentDate
+        );
+
+        setPastMatches(past);
+        setFutureMatches(future);
       } catch (error) {
         console.error("Planlanmış maçlar alınırken hata oluştu:", error);
       }
     };
+
 
     fetchMatches();
     fetchScheduledMatches();
@@ -121,8 +137,8 @@ const Matches = () => {
 
         const matchesRef = collection(db, "matches");
         await addDoc(matchesRef, {
-          senderTeamId: requestData.senderTeamId, // Gönderen takımın ID'si
-          receiverTeamId: requestData.receiverTeamId, // Alıcı takımın ID'si
+          senderTeamId: requestData.senderTeamId,
+          receiverTeamId: requestData.receiverTeamId,
           field: requestData.field,
           date: requestData.date,
           time: requestData.time,
@@ -130,7 +146,7 @@ const Matches = () => {
           createdAt: new Date(),
         });
 
-        await deleteDoc(requestRef); // İstek silinir
+        await deleteDoc(requestRef);
         setRequests((prev) => prev.filter((req) => req.id !== requestId));
         alert("Maç isteği onaylandı ve maç planlandı.");
       }
@@ -139,18 +155,28 @@ const Matches = () => {
     }
   };
 
+  const handleReject = async (requestId) => {
+    try {
+      await deleteDoc(doc(db, "matchRequests", requestId));
+      setRequests((prev) => prev.filter((req) => req.id !== requestId));
+      alert("Maç isteği reddedildi.");
+    } catch (error) {
+      console.error("Maç isteği reddedilirken hata oluştu:", error);
+    }
+  };
+
   return (
-    <div>
-      <h2 className="text-lg font-bold">Maçlar</h2>
+    <div className="flex flex-col p-2">
+      <h2 className="text-4xl font-bold">Maçlar</h2>
 
       {teamData?.captainId === userId && (
-        <div>
-          <h3 className="font-bold mb-2">Gelen İstekler</h3>
+        <div className="flex flex-col justify-center items-center my-2">
           {requests.length > 0 ? (
             requests.map((req) => (
-              <div key={req.id} className="border p-2 mb-2">
+              <div key={req.id} className="p-2 mb-2">
                 <p>
-                  {req.field} - {req.date?.toDate().toLocaleDateString()} -{" "}
+                  {req.field} -{" "}
+                  {new Date(req.date.seconds * 1000).toLocaleDateString()} -{" "}
                   {req.time}
                 </p>
                 <div className="flex gap-2">
@@ -160,17 +186,28 @@ const Matches = () => {
                   >
                     Onayla
                   </button>
+                  <button
+                    className="bg-red-500 text-white p-2 rounded"
+                    onClick={() => handleReject(req.id)}
+                  >
+                    Reddet
+                  </button>
                 </div>
               </div>
             ))
           ) : (
-            <p>Henüz maç isteği yok.</p>
+            <p></p>
           )}
         </div>
       )}
 
-      {/* Planlanmış Maçlar Bileşeni */}
-      <ScheduledMatches matches={upcomingMatches} />
+      <div>
+        <ScheduledMatches matches={futureMatches} />
+      </div>
+
+      <div>
+        <ScheduledMatches matches={pastMatches} />
+      </div>
     </div>
   );
 };

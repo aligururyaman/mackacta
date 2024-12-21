@@ -242,7 +242,7 @@ export default function MyTeam() {
 
 
   return (
-    <div>
+    <div className="w-">
       {!teamData ? (
         <div>
           <h2 className="text-lg font-bold">Takımınız yok</h2>
@@ -314,9 +314,9 @@ export default function MyTeam() {
         </div>
       ) : (
         <div className="flex flex-col">
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center ">
 
-            <div className="p-4 flex flex-col items-center justify-center bg-green-200 w-[40%] rounded-xl border-2 border-green-300 shadow-xl relative">
+            <div className="p-4 flex flex-col items-center justify-center bg-green-200  sm:w-[40%] rounded-xl border-2 border-green-300 shadow-xl relative">
               {teamRequests.length > 0 && auth.currentUser?.uid === teamData?.captainId && (
                 <div
                   key={teamRequests}
@@ -366,7 +366,7 @@ export default function MyTeam() {
               <img
                 src={teamData.teamImage}
                 alt="Takım Resmi"
-                className="w-32 h-32 rounded-full object-cover border-2 border-green-400 shadow-xl"
+                className="w-32 h-32 rounded-full object-cover border-2 border-green-400 shadow-xl "
               />
               <div className="flex flex-col items-center">
                 <p className="text-4xl font-black">{teamData.name}</p>
@@ -395,8 +395,9 @@ export default function MyTeam() {
                         <TableHead>Profil Resmi</TableHead>
                         <TableHead>Ad</TableHead>
                         <TableHead>Telefon</TableHead>
-                        <TableHead>İl</TableHead>
-                        <TableHead>İlçe</TableHead>
+                        <TableHead className="hidden sm:flex">İl</TableHead>
+                        <TableHead className="hidden sm:flex">İlçe</TableHead>
+                        <TableHead>Rol</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -411,15 +412,15 @@ export default function MyTeam() {
                               <img
                                 src={member.profileImage || "/placeholder.png"}
                                 alt="Profil Resmi"
-                                className="w-14 h-14 rounded-full object-cover"
+                                className="sm:w-14 sm:h-14 w-10 h-10 rounded-full object-cover"
                               />
                             </TableCell>
                             <TableCell>
                               {capitalizeWords(member.name)} {capitalizeWords(member.surname)}
                             </TableCell>
-                            <TableCell>{member.phone || "Belirtilmemiş"}</TableCell>
-                            <TableCell>{capitalizeWords(member.city)}</TableCell>
-                            <TableCell>{capitalizeWords(member.district)}</TableCell>
+                            <TableCell >{member.phone || "Belirtilmemiş"}</TableCell>
+                            <TableCell className="hidden sm:flex">{capitalizeWords(member.city)}</TableCell>
+                            <TableCell className="hidden sm:flex">{capitalizeWords(member.district)}</TableCell>
                             <TableCell>
                               {member.id === teamData.captainId ? (
                                 <span className="text-green-700 font-bold">Kaptan</span>

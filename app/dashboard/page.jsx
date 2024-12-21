@@ -213,8 +213,8 @@ export default function Dashboard() {
                   <BreadcrumbLink href="#">{selectedItem || "Ana Menü"}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block font-semibold" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{selectedSubItem}</BreadcrumbPage>
+                <BreadcrumbItem >
+                  <BreadcrumbPage className="text-lime-400 font-bold">{selectedSubItem}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

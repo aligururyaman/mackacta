@@ -115,7 +115,6 @@ export function AppSidebar({ onSelectMenu, ...props }) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>

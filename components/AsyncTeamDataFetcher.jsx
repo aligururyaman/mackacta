@@ -52,42 +52,29 @@ const AsyncTeamDataFetcher = ({ teamId }) => {
   }, [teamId]);
 
   return (
-    <div className="flex items-center gap-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Resim</TableHead>
-            <TableHead>Takım Adı</TableHead>
-            <TableHead>Kaptan Adı</TableHead>
-            <TableHead className="text-right">Tel No:</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-
-          <TableRow>
-            <TableCell className="font-medium">  {teamData.teamImage && (
+    <div className="flex flex-col items-center gap-4">
+      <div>
+        {teamData.teamImage && (
+          <div key={teamData.id} className="flex flex-col justify-center items-center text-lime-400 font-bold">
+            <div>
               <img
                 src={teamData.teamImage}
                 alt="Takım Resmi"
-                className="w-10 h-10 rounded-full object-cover"
+                className="sm:w-36 sm:h-36 w-28 h-28  rounded-full object-cover"
               />
-            )}</TableCell>
-            <TableCell> {teamData.name} </TableCell>
-            <TableCell>{teamData.captainId && (
-              <p>
-                <AsyncDataFetcher captainId={teamData.captainId} />
-              </p>
-            )}</TableCell>
-            <TableCell className="text-right">{teamData.captainId && (
-              <p>
-                <AsyncDataPhone captainId={teamData.captainId} />
-              </p>
-            )}</TableCell>
-          </TableRow>
+            </div>
+            <div className="text-3xl">
+              {teamData.name}
+            </div>
+            <div className="text-sm">
+              <AsyncDataPhone captainId={teamData.captainId} />
+            </div>
 
-        </TableBody>
-      </Table>
-    </div>
+
+          </div>
+        )}
+      </div>
+    </div >
   );
 };
 

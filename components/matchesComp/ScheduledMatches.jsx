@@ -18,18 +18,20 @@ const ScheduledMatches = ({ matches }) => {
   }
 
   return (
-    <div className="flex flex-col justify-center p-2">
+    <div className="flex flex-wrap p-2 justify-center sm:justify-normal">
       {matches.map((match) => (
-        <div key={match.id} className="flex flex-col p-5 w-full mb-2 items-center bg-green-300 rounded-xl ">
-          <div className="flex p-2 w-[95%] justify-center items-center gap-10 bg-green-200 rounded-xl shadow-xl">
-            <div>
+        <div key={match.id}>
+          <div className="flex flex-col justify-center items-center bg-slate-500 rounded-xl p-4 gap-3 shadow-xl border border-slate-700 w-80 ">
+            <div className="flex flex-row">
               <AsyncTeamDataFetcher teamId={match.senderTeamId} />
             </div>
             <div className="flex flex-col justify-center items-center text-sm font-semibold gap-2">
-              <div className="flex bg-green-800 text-green-200 p-2 rounded-xl">
+              <div className="flex flex-col justify-center items-center text-green-200 p-2 rounded-xl">
+                <p className="text-lime-600">Saha :</p>
                 {match.field}
               </div>
-              <div className="flex flex-col justify-center items-center p-3 bg-green-800 text-green-200 rounded-xl">
+              <div className="flex flex-col justify-center items-center p-3  text-green-200 rounded-xl">
+                <p className="text-lime-600">Zaman :</p>
                 <div >
                   {match.date?.toDate().toLocaleDateString()}
                 </div>
@@ -39,7 +41,6 @@ const ScheduledMatches = ({ matches }) => {
               </div>
             </div>
             <div>
-              <AsyncTeamDataFetcher teamId={match.receiverTeamId} />
             </div>
           </div>
 

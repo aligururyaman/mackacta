@@ -201,7 +201,7 @@ const Matches = () => {
         </div>
       )}
 
-      <div>
+      <div className="">
         <ScheduledMatches matches={futureMatches} />
       </div>
 

@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const capitalizeWords = (str) => {
   return str
@@ -424,8 +425,6 @@ export default function UserInfo() {
           ))}
         </ul>
       </div>
-
-
     </div>
 
   );

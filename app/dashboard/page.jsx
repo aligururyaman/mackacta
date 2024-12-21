@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import MatchNotification from "@/components/notifications/MatchNotification";
 
 
+
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState(""); // Ana menü
   const [selectedSubItem, setSelectedSubItem] = useState(""); // Alt menü
@@ -198,12 +199,11 @@ export default function Dashboard() {
     setShowProfile(true);
   };
 
-
   return (
     <SidebarProvider>
       <AppSidebar onSelectMenu={handleMenuSelect} />
       <SidebarInset>
-        <header className="flex h-16 justify-between shrink-0 items-center gap-2 border-b px-4 bg-green-300">
+        <header className="flex h-16 justify-between shrink-0 items-center gap-2 border-b px-4 bg-gray-800 text-lime-400 font-extrabold">
           <div className="flex flex-row justify-center items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -237,12 +237,7 @@ export default function Dashboard() {
             </p>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 bg-green-100 relative">
-          <div className="absolute inset-0 flex items-center justify-center z-9">
-            <div className="absolute w-full h-1 bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute w-72 h-72 border-4 border-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute w-6 h-6 bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-          </div>
+        <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-600 relative">
           <div className="relative z-10">
             {renderContent()}
           </div>

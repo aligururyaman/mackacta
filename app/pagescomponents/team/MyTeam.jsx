@@ -388,10 +388,10 @@ export default function MyTeam() {
             <div>
               <h2 className="text-lg font-bold">Takımım</h2>
               {members.length > 0 && (
-                <div className="mt-6">
+                <div className="mt-6 font-semibold">
                   <Table>
                     <TableHeader>
-                      <TableRow>
+                      <TableRow className="border-gray-400">
                         <TableHead>Profil Resmi</TableHead>
                         <TableHead>Ad</TableHead>
                         <TableHead>Telefon</TableHead>
@@ -411,7 +411,7 @@ export default function MyTeam() {
                               <img
                                 src={member.profileImage || "/placeholder.png"}
                                 alt="Profil Resmi"
-                                className="w-10 h-10 rounded-full object-cover"
+                                className="w-14 h-14 rounded-full object-cover"
                               />
                             </TableCell>
                             <TableCell>
@@ -422,7 +422,7 @@ export default function MyTeam() {
                             <TableCell>{capitalizeWords(member.district)}</TableCell>
                             <TableCell>
                               {member.id === teamData.captainId ? (
-                                <span className="text-green-500 font-bold">Kaptan</span>
+                                <span className="text-green-700 font-bold">Kaptan</span>
                               ) : (
                                 <Button
                                   variant="outline"

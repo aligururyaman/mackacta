@@ -91,7 +91,7 @@ export function AppSidebar({ onSelectMenu, ...props }) {
 
   return (
     <>
-      <Sidebar {...props} className="bg-green-300">
+      <Sidebar {...props} className="bg-gray-800 text-lime-400 font-extrabold">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
@@ -99,7 +99,7 @@ export function AppSidebar({ onSelectMenu, ...props }) {
                 <div>
                   <div className="flex aspect-square  items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                     <Image
-                      className="w-12 h-12 rounded-full bg-green-300 object-none"
+                      className="w-12 h-12 rounded-full object-none"
                       src={logo}
                       alt="profil resmi"
                       width={40}

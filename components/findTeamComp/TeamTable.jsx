@@ -81,13 +81,14 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
               {currentUserData?.teamId === null ? (
                 // Kullanıcının takımı yoksa "Takıma Katıl" düğmesi
                 <Button
-                  className="min-w-min justify-center items-center text-sm px-2 py-1 bg-lime-400"
+                  className="min-w-min justify-center items-center text-sm px-2 py-1 bg-lime-400 rounded-xl"
                   onClick={() => handleJoinTeam(team.id)}
                 >
                   <IoPersonAdd />
                   Takıma Katıl
                 </Button>
-              ) : currentUserData?.teamId !== team.id ? (
+              ) : currentUserData?.teamId && currentUserData?.teamId !== team.id ? (
+                // Kullanıcının bir takımı varsa ve o takım bu değilse "Maç Ayarla" düğmesi
                 <Button
                   className="min-w-min justify-center items-center text-sm px-2 py-1 bg-lime-400  rounded-xl"
                   onClick={() => handleMatchSetup(team.id)}
@@ -95,8 +96,9 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
                   <LuSwords />
                   Maç Ayarla
                 </Button>
-              ) : null/* Kullanıcı bir takıma üyeyse hiçbir şey gösterme */}
+              ) : null /* Kullanıcının takımı bu ise hiçbir şey gösterme */}
             </TableCell>
+
           </TableRow>
         ))}
       </TableBody>

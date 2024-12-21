@@ -249,7 +249,7 @@ export default function MyTeam() {
           <p>Takım oluşturmak için TAKIM KUR seçeneğini kullanabilirsiniz.</p>
           <Sheet>
             <SheetTrigger asChild>
-              <Button>Takım Kur</Button>
+              <Button className="bg-lime-400 rounded-xl">Takım Kur</Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>

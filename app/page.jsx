@@ -66,7 +66,8 @@ export default function Home() {
       await setDoc(userDocRef, {
         name, // Kullanıcı adı
         surname, // Kullanıcı soyadı
-        email: user.email, // Kullanıcı e-posta adresi
+        email: user.email,
+        teamId: null, // Kullanıcı e-posta adresi
         createdAt: new Date(), // Hesap oluşturulma tarihi
       });
 
@@ -85,7 +86,7 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-green-200">
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-600">
       <motion.h1
         initial={{
           opacity: 0,
@@ -111,12 +112,12 @@ export default function Home() {
       </motion.h1>
 
       <Tabs defaultValue="SignIn" className="w-[400px] bg-none rounded-xl">
-        <TabsList className="grid w-full grid-cols-2 bg-green-200">
-          <TabsTrigger value="SignIn" className="bg-green-500">Giriş Yap</TabsTrigger>
-          <TabsTrigger value="SignUp" className="bg-green-500">Hesap Oluştur</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-gray-300">
+          <TabsTrigger value="SignIn" className="bg-gray-600">Giriş Yap</TabsTrigger>
+          <TabsTrigger value="SignUp" className="bg-gray-600">Hesap Oluştur</TabsTrigger>
         </TabsList>
         <TabsContent value="SignIn" >
-          <Card className="bg-green-300 rounded-xl shadow-xl">
+          <Card className="bg-gray-600 border-none rounded-xl shadow-xl">
             <CardHeader>
               <CardTitle>Giriş Yap</CardTitle>
               <CardDescription>Dünyamızı keşfetmek için giriş yap.</CardDescription>
@@ -143,12 +144,12 @@ export default function Home() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="rounded-xl bg-green-600 hover:bg-green-100" onClick={handleSignIn}>Giriş Yap</Button>
+              <Button className="rounded-xl bg-lime-400 hover:bg-green-100" onClick={handleSignIn}>Giriş Yap</Button>
             </CardFooter>
           </Card>
         </TabsContent>
         <TabsContent value="SignUp">
-          <Card className="bg-green-300 rounded-xl shadow-xl">
+          <Card className="bg-gray-600 border-none rounded-xl shadow-xl">
             <CardHeader>
               <CardTitle>Kayıt Ol</CardTitle>
               <CardDescription>Dünyamızı keşfetmek için kayıt ol.</CardDescription>
@@ -194,7 +195,7 @@ export default function Home() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="rounded-xl bg-green-600 hover:bg-green-100" onClick={handleSignUp}>Kayıt Ol</Button>
+              <Button className="rounded-xl bg-lime-400 hover:bg-green-100" onClick={handleSignUp}>Kayıt Ol</Button>
             </CardFooter>
           </Card>
         </TabsContent>

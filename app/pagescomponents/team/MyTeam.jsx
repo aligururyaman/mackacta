@@ -313,10 +313,10 @@ export default function MyTeam() {
           </Sheet>
         </div>
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-10">
           <div className="flex items-center justify-center ">
 
-            <div className="p-4 flex flex-col items-center justify-center bg-green-200  sm:w-[40%] rounded-xl border-2 border-green-300 shadow-xl relative">
+            <div className="p-4 flex flex-col items-center justify-center bg-slate-500 sm:w-96 rounded-xl  shadow-xl relative ">
               {teamRequests.length > 0 && auth.currentUser?.uid === teamData?.captainId && (
                 <div
                   key={teamRequests}
@@ -363,23 +363,23 @@ export default function MyTeam() {
                 </SheetContent>
               </Sheet>
 
-              <img
-                src={teamData.teamImage}
-                alt="Takım Resmi"
-                className="w-32 h-32 rounded-full object-cover border-2 border-green-400 shadow-xl "
-              />
-              <div className="flex flex-col items-center">
-                <p className="text-4xl font-black">{teamData.name}</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <p className="text-lg font-light">{teamData.city}</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <p className="text-lg font-light">{teamData.district}</p>
+              <div className="flex flex-col justify-center items-center">
+                <img
+                  src={teamData.teamImage}
+                  alt="Takım Resmi"
+                  className="w-32 h-32 rounded-full object-cover  shadow-xl "
+                />
+                <div className="flex flex-col items-center">
+                  <p className="text-4xl font-black">{teamData.name}</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <p className="text-lg font-light">{teamData.city}</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <p className="text-lg font-light">{teamData.district}</p>
+                </div>
               </div>
             </div>
-
-
           </div>
 
 
@@ -395,8 +395,8 @@ export default function MyTeam() {
                         <TableHead>Profil Resmi</TableHead>
                         <TableHead>Ad</TableHead>
                         <TableHead>Telefon</TableHead>
-                        <TableHead className="hidden sm:flex">İl</TableHead>
-                        <TableHead className="hidden sm:flex">İlçe</TableHead>
+                        <TableHead className="hidden md:flex">İl</TableHead>
+                        <TableHead className="hidden md:flex">İlçe</TableHead>
                         <TableHead>Rol</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -419,8 +419,8 @@ export default function MyTeam() {
                               {capitalizeWords(member.name)} {capitalizeWords(member.surname)}
                             </TableCell>
                             <TableCell >{member.phone || "Belirtilmemiş"}</TableCell>
-                            <TableCell className="hidden sm:flex">{capitalizeWords(member.city)}</TableCell>
-                            <TableCell className="hidden sm:flex">{capitalizeWords(member.district)}</TableCell>
+                            <TableCell className="hidden md:flex">{capitalizeWords(member.city)}</TableCell>
+                            <TableCell className="hidden md:flex">{capitalizeWords(member.district)}</TableCell>
                             <TableCell>
                               {member.id === teamData.captainId ? (
                                 <span className="text-green-700 font-bold">Kaptan</span>

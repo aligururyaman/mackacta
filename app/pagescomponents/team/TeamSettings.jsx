@@ -75,7 +75,7 @@ export default function TeamSettings() {
       <h2 className="text-lg font-bold">Takım Ayarları</h2>
       {teamData ? (
         <div>
-          <Button variant="destructive" onClick={handleDeleteTeam}>
+          <Button variant="" className="rounded-xl bg-slate-200 hover:bg-slate-500" onClick={handleDeleteTeam}>
             Takımı Sil
           </Button>
         </div>

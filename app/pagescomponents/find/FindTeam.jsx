@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import TeamTable from "@/components/findTeamComp/TeamTable";
 import MatchModal from "@/components/findTeamComp/MatchModal";
+import { Search } from 'lucide-react';
 
 const capitalizeWords = (str) => {
   return str
@@ -103,67 +104,72 @@ const FindTeam = () => {
   };
 
   return (
-    <div className="p-5">
+    <div className="flex flex-col gap-4">
       <h2 className="text-lg font-bold mb-4">Takım Arama</h2>
 
       {/* Şehir ve İlçe Arama */}
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col gap-2">
         <h3>Şehir ve İlçe ile Ara</h3>
-        <div className="flex items-center gap-4">
-          <Select onValueChange={(value) => setSearchCity(value)}>
-            <SelectTrigger className="w-40 bg-green-300 rounded-xl">
-              <SelectValue placeholder="Şehir Seç" />
-            </SelectTrigger>
-            <SelectContent className="bg-green-300 rounded-xl">
-              <SelectGroup>
-                <SelectLabel>Şehirler</SelectLabel>
-                {cityData.map((city) => (
-                  <SelectItem key={city.name} value={capitalizeWords(city.name)}>
-                    {capitalizeWords(city.name)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Select
-            onValueChange={(value) => setSearchDistrict(value)}
-            disabled={!searchCity}
-
-          >
-            <SelectTrigger className="w-40 bg-green-300 rounded-xl">
-              <SelectValue placeholder="İlçe Seç" />
-            </SelectTrigger>
-            <SelectContent className="bg-green-300 rounded-xl">
-              <SelectGroup>
-                <SelectLabel>İlçeler</SelectLabel>
-                {cityData
-                  .find((city) => capitalizeWords(city.name) === searchCity)
-                  ?.counties.map((district, index) => (
-                    <SelectItem key={index} value={capitalizeWords(district)}  >
-                      {capitalizeWords(district)}
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2  items-center">
+            <Select onValueChange={(value) => setSearchCity(value)}>
+              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+                <SelectValue placeholder="Şehir Seç" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-400 border-none rounded-xl">
+                <SelectGroup>
+                  <SelectLabel>Şehirler</SelectLabel>
+                  {cityData.map((city) => (
+                    <SelectItem key={city.name} value={capitalizeWords(city.name)}>
+                      {capitalizeWords(city.name)}
                     </SelectItem>
                   ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
-          <Button onClick={handleCityDistrictSearch}>Ara</Button>
+            <Select
+              onValueChange={(value) => setSearchDistrict(value)}
+              disabled={!searchCity}
+
+            >
+              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+                <SelectValue placeholder="İlçe Seç" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-400 border-none rounded-xl">
+                <SelectGroup>
+                  <SelectLabel>İlçeler</SelectLabel>
+                  {cityData
+                    .find((city) => capitalizeWords(city.name) === searchCity)
+                    ?.counties.map((district, index) => (
+                      <SelectItem key={index} value={capitalizeWords(district)}  >
+                        {capitalizeWords(district)}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+              <Search size={40} strokeWidth={2.75} />
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Takım Adı ile Arama */}
-      <div className="mb-6 ">
+      <div className="mb-6 flex flex-col gap-2">
         <h3>Takım Adı ile Ara</h3>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ">
           <input
             type="text"
             placeholder="Takım Adı"
-            className="w-40 p-2 border rounded-xl bg-green-300"
+            className="w-40 p-2 border rounded-xl bg-slate-400 border-none placeholder-slate-500"
             value={searchTeamName}
             onChange={(e) => setSearchTeamName(e.target.value)}
           />
-          <Button onClick={handleTeamNameSearch}>Ara</Button>
+          <Button onClick={handleTeamNameSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+            <Search size={40} strokeWidth={2.75} />
+          </Button>
         </div>
       </div>
 

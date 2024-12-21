@@ -1,16 +1,5 @@
 'use client';
 import AsyncTeamDataFetcher from "@/components/AsyncTeamDataFetcher";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Input } from "../ui/input";
 
 const ScheduledMatches = ({ matches }) => {
   if (!matches || matches.length === 0) {
@@ -18,7 +7,7 @@ const ScheduledMatches = ({ matches }) => {
   }
 
   return (
-    <div className="flex flex-wrap p-2 justify-center sm:justify-normal">
+    <div className="flex flex-wrap p-2 justify-center md:justify-normal">
       {matches.map((match) => (
         <div key={match.id}>
           <div className="flex flex-col justify-center items-center bg-slate-500 rounded-xl p-4 gap-3 shadow-xl border border-slate-700 w-80 ">

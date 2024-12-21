@@ -64,17 +64,6 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
 
   return (
     <Table>
-      <TableCaption>Arama sonuçları</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Takım Resmi</TableHead>
-          <TableHead>Takım Adı</TableHead>
-          <TableHead>Şehir</TableHead>
-          <TableHead>İlçe</TableHead>
-          <TableHead>Telefon</TableHead>
-          <TableHead>İşlem</TableHead>
-        </TableRow>
-      </TableHeader>
       <TableBody>
         {teams.map((team) => (
           <TableRow key={team.id}>
@@ -86,14 +75,13 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
               />
             </TableCell>
             <TableCell>{team.name}</TableCell>
-            <TableCell>{team.city}</TableCell>
-            <TableCell>{team.district}</TableCell>
-            <TableCell>-</TableCell>
+            <TableCell className="hidden md:table-cell">{team.city}</TableCell>
+            <TableCell className="hidden md:table-cell">{team.district}</TableCell>
             <TableCell>
               {currentUserData?.teamId === null ? (
                 // Kullanıcının takımı yoksa "Takıma Katıl" düğmesi
                 <Button
-                  className="min-w-min justify-center items-center text-sm px-2 py-1"
+                  className="min-w-min justify-center items-center text-sm px-2 py-1 bg-lime-400"
                   onClick={() => handleJoinTeam(team.id)}
                 >
                   <IoPersonAdd />
@@ -101,7 +89,7 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
                 </Button>
               ) : currentUserData?.teamId !== team.id ? (
                 <Button
-                  className="min-w-min justify-center items-center text-sm px-2 py-1"
+                  className="min-w-min justify-center items-center text-sm px-2 py-1 bg-lime-400  rounded-xl"
                   onClick={() => handleMatchSetup(team.id)}
                 >
                   <LuSwords />

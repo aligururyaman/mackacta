@@ -43,7 +43,6 @@ const data = {
       title: "Bul",
       url: "#",
       items: [
-        { title: "Rakip Bul", url: "#" },
         { title: "Takım Bul", url: "#" },
         { title: "Oyuncu Bul", url: "#" },
       ],

@@ -19,7 +19,6 @@ import MyTeam from "../pagescomponents/team/MyTeam";
 import Matches from "../pagescomponents/team/Matches";
 import TeamSettings from "../pagescomponents/team/TeamSettings";
 import FindPlayer from "../pagescomponents/find/FindPlayer";
-import FindRival from "../pagescomponents/find/FindRival";
 import FindTeam from "../pagescomponents/find/FindTeam";
 import ProfileSettings from "../pagescomponents/profile/ProfileSettings";
 import UserInfo from "../pagescomponents/profile/UserInfo";
@@ -172,9 +171,6 @@ export default function Dashboard() {
     }
     if (selectedSubItem === "Ayarlar") {
       return <TeamSettings />;
-    }
-    if (selectedSubItem === "Rakip Bul") {
-      return <FindRival />;
     }
     if (selectedSubItem === "Takım Bul") {
       return <FindTeam />;

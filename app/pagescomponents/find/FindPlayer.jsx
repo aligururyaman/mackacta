@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { auth } from "@/utils/firebase";
 import { AnimatePresence, motion } from "framer-motion";
 import { useOutsideClick } from "@/hooks/use-outside-click";
+import { Search } from "lucide-react";
 
 
 
@@ -158,118 +159,115 @@ const FindPlayer = () => {
 
 
   return (
-    <div className="flex flex-row p-5">
+    <div className="flex flex-col ">
       <div className="flex flex-col w-96">
-        <div>
+        <div className="flex flex-col gap-3">
           <h3>Şehir ve İlçe ile Ara</h3>
+          <div className="flex flex-row gap-2 items-center">
+            <Select onValueChange={(value) => setSearchCity(value)}>
+              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+                <SelectValue placeholder="Şehir Seç" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-400 border-none rounded-xl">
+                <SelectGroup>
+                  <SelectLabel>Şehirler</SelectLabel>
+                  {cityData.map((city) => (
+                    <SelectItem key={city.name} value={capitalizeWords(city.name)}>
+                      {capitalizeWords(city.name)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
-          <Select onValueChange={(value) => setSearchCity(value)}>
-            <SelectTrigger className="w-full max-w-xs bg-green-300 rounded-xl">
-              <SelectValue placeholder="Şehir Seç" />
-            </SelectTrigger>
-            <SelectContent className="bg-green-300 rounded-xl">
-              <SelectGroup>
-                <SelectLabel>Şehirler</SelectLabel>
-                {cityData.map((city) => (
-                  <SelectItem key={city.name} value={capitalizeWords(city.name)}>
-                    {capitalizeWords(city.name)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Select
-            onValueChange={(value) => setSearchDistrict(value)}
-            disabled={!searchCity}
-          >
-            <SelectTrigger className="w-full max-w-xs mt-4 bg-green-300 rounded-xl">
-              <SelectValue placeholder="İlçe Seç" />
-            </SelectTrigger>
-            <SelectContent className="bg-green-300 rounded-xl">
-              <SelectGroup>
-                <SelectLabel>İlçeler</SelectLabel>
-                {districts.map((district, index) => (
-                  <SelectItem key={index} value={district}>
-                    {district}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <div className="mt-5">
-            <Button onClick={handleCityDistrictSearch}>Ara</Button>
+            <Select
+              onValueChange={(value) => setSearchDistrict(value)}
+              disabled={!searchCity}
+            >
+              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+                <SelectValue placeholder="İlçe Seç" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-400 border-none rounded-xl">
+                <SelectGroup>
+                  <SelectLabel>İlçeler</SelectLabel>
+                  {districts.map((district, index) => (
+                    <SelectItem key={index} value={district}>
+                      {district}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+              <Search size={40} strokeWidth={2.75} />
+            </Button>
           </div>
         </div>
-
-        <div className="mt-6">
+        <div className="mt-6 flex flex-col gap-3">
           <h3>Ad ve Soyad ile Ara</h3>
-          <input
-            type="text"
-            placeholder="Ad"
-            className="block w-full max-w-xs mt-2 p-2 border bg-green-300 rounded-xl"
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Soyad"
-            className="block w-full max-w-xs mt-2 p-2 border bg-green-300 rounded-xl"
-            value={searchSurname}
-            onChange={(e) => setSearchSurname(e.target.value)}
-          />
+          <div className="flex flex-row items-center gap-3">
+            <input
+              type="text"
+              placeholder="Ad"
+              className="w-40 p-2 bg-slate-400 border-none placeholder-slate-500 rounded-xl"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Soyad"
+              className="w-40 p-2 bg-slate-400 border-none placeholder-slate-500 rounded-xl"
+              value={searchSurname}
+              onChange={(e) => setSearchSurname(e.target.value)}
+            />
+            <Button onClick={handleNameSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+              <Search size={40} strokeWidth={2.75} />
+            </Button>
+          </div>
           <div className="mt-5">
-            <Button onClick={handleNameSearch}>Ara</Button>
+
           </div>
         </div>
       </div>
 
-
-      <ul className="max-w-2xl mx-auto w-full gap-4">
-        {users.map((user, index) => (
-          <div key={user.id} className="p-4 flex flex-col md:flex-row justify-between items-center hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl">
-            <motion.div
-              layoutId={`card-${user.name}-${id}`}
-              key={`card-${user.name}-${id}`}
-              onClick={() => setActive(user)}
-              className="flex w-screen cursor-pointer"
-            >
-              <div className="flex gap-4 flex-col md:flex-row ">
-                <motion.div layoutId={`image-${user.name}-${id}`}>
-                  <img
-                    className="w-10 h-10 rounded-full bg-gray-300 object-cover"
-                    src={user.profileImage}
-                    alt="profil resmi"
-                  />
-                </motion.div>
-                <div className="">
-                  <motion.h3
-                    layoutId={`title-${user.name}-${id}`}
-                    className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left">
-                    {user.name}
-                  </motion.h3>
-                  <motion.p
-                    layoutId={`description-${user.name}-${id}`}
-                    className="text-neutral-600 dark:text-neutral-400 text-center md:text-left">
-                    {user.surname}
-                  </motion.p>
+      <div className="flex flex-col w-96">
+        <ul className="flex flex-col gap-4 ">
+          {users.map((user, index) => (
+            <div key={user.id} className="p-4 flex flex-col md:flex-row  hover:bg-slate-400 dark:hover:bg-neutral-800 rounded-xl">
+              <motion.div
+                layoutId={`card-${user.name}-${id}`}
+                key={`card-${user.name}-${id}`}
+                onClick={() => setActive(user)}
+                className="flex w-96 cursor-pointer"
+              >
+                <div className="flex gap-4 flex-row  ">
+                  <motion.div layoutId={`image-${user.name}-${id}`}>
+                    <img
+                      className="w-10 h-10 rounded-full bg-gray-300 object-cover"
+                      src={user.profileImage}
+                      alt="profil resmi"
+                    />
+                  </motion.div>
+                  <div className="">
+                    <motion.h3
+                      layoutId={`title-${user.name}-${id}`}
+                      className="font-medium text-neutral-900 dark:text-neutral-200 text-left">
+                      {user.name}
+                    </motion.h3>
+                    <motion.p
+                      layoutId={`description-${user.name}-${id}`}
+                      className="text-neutral-800 dark:text-neutral-400 text-left">
+                      {user.surname}
+                    </motion.p>
+                  </div>
                 </div>
-              </div>
 
-            </motion.div>
-            <motion.button
-              layoutId={`button-${user.name}-${id}`}
-              className="px-4 w-full py-2 text-sm rounded-full font-bold bg-gray-200 hover:bg-green-500 hover:text-white text-black mt-4 md:mt-0"
-              onClick={() => handleSendFriendRequest(user.id)}
-              disabled={user.id === auth.currentUser?.uid}
-            >
-              Arkadaş Ekle
-            </motion.button>
-          </div>
-        ))}
+              </motion.div>
+            </div>
+          ))}
 
-      </ul>
-
+        </ul>
+      </div>
 
       <AnimatePresence>
         {active && (

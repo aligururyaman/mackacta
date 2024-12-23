@@ -37,7 +37,6 @@ export default function MyTeam() {
   const [districts, setDistricts] = useState([]);
   const [teamImage, setTeamImage] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
-  const [openNotification, setOpenNotification] = useState(null);
 
   useEffect(() => {
     if (formData.city) {
@@ -187,38 +186,7 @@ export default function MyTeam() {
       setLoading(false);
     }
   };
-  const handleAcceptRequest = async (requestId, senderId) => {
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
 
-      // İstek durumunu 'accepted' olarak güncelle
-      await updateDoc(doc(db, "teamRequests", requestId), {
-        status: "accepted",
-      });
-
-      // İstek gönderen kullanıcıyı takım üyelerine ekle
-      await updateDoc(doc(db, "users", senderId), {
-        teamId: teamData.id,
-      });
-
-      alert("İstek kabul edildi.");
-      fetchTeamData(); // Verileri tekrar yükle
-    } catch (error) {
-      console.error("İstek kabul edilirken hata oluştu:", error);
-    }
-  };
-
-  const handleRejectRequest = async (requestId) => {
-    try {
-      // İsteği sil
-      await deleteDoc(doc(db, "teamRequests", requestId));
-      alert("İstek reddedildi.");
-      fetchTeamData(); // Verileri tekrar yükle
-    } catch (error) {
-      console.error("İstek reddedilirken hata oluştu:", error);
-    }
-  };
 
   const handleRemovePlayer = async (memberId, memberName) => {
     try {
@@ -249,7 +217,7 @@ export default function MyTeam() {
           <p>Takım oluşturmak için TAKIM KUR seçeneğini kullanabilirsiniz.</p>
           <Sheet>
             <SheetTrigger asChild>
-              <Button className="bg-lime-400 rounded-xl">Takım Kur</Button>
+              <Button className="bg-foreground rounded-xl">Takım Kur</Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
@@ -317,51 +285,6 @@ export default function MyTeam() {
           <div className="flex items-center justify-center ">
 
             <div className="p-4 flex flex-col items-center justify-center bg-slate-500 sm:w-96 rounded-xl  shadow-xl relative ">
-              {teamRequests.length > 0 && auth.currentUser?.uid === teamData?.captainId && (
-                <div
-                  key={teamRequests}
-                  className="flex h-10 w-10 absolute top-[-10px] right-[-10px] rounded-full bg-red-500 justify-center items-center cursor-pointer"
-                  onClick={() => setOpenNotification(true)} // Bildirim panelini aç
-                >
-                  <p className="font-bold text-2xl text-white">{teamRequests.length}</p>
-                </div>
-              )}
-
-
-              {/* Bildirim Paneli */}
-              <Sheet open={openNotification} onOpenChange={setOpenNotification}>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Takıma Katılma İstekleri</SheetTitle>
-                  </SheetHeader>
-                  <ul>
-                    {teamRequests.map((request) => (
-                      <li
-                        key={request.id}
-                        className="flex justify-between items-center mt-4 p-2 border-2 rounded-md"
-                      >
-                        <span>
-                          <strong>{request.senderName} {request.senderSurname}</strong> takıma katılmak istiyor.
-                        </span>
-                        <div>
-                          <Button
-                            className="mr-2"
-                            onClick={() => handleAcceptRequest(request.id, request.senderId)}
-                          >
-                            Kabul Et
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleRejectRequest(request.id)}
-                          >
-                            Reddet
-                          </Button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </SheetContent>
-              </Sheet>
 
               <div className="flex flex-col justify-center items-center">
                 <img
@@ -381,9 +304,6 @@ export default function MyTeam() {
               </div>
             </div>
           </div>
-
-
-
           {members.length > 0 && (
             <div>
               <h2 className="text-lg font-bold">Takımım</h2>

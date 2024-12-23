@@ -90,7 +90,7 @@ const TeamTable = ({ teams, currentUserData, setPlaySetMatch, setSelectedTeamId,
               ) : currentUserData?.teamId && currentUserData?.teamId !== team.id ? (
                 // Kullanıcının bir takımı varsa ve o takım bu değilse "Maç Ayarla" düğmesi
                 <Button
-                  className="min-w-min justify-center items-center text-sm px-2 py-1 bg-lime-400  rounded-xl"
+                  className="min-w-min justify-center items-center text-sm px-2 py-1 bg-foreground  rounded-xl"
                   onClick={() => handleMatchSetup(team.id)}
                 >
                   <LuSwords />

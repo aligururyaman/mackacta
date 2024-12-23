@@ -6,18 +6,14 @@ import {
   query,
   where,
   getDocs,
-  updateDoc,
-  deleteDoc,
   doc,
   getDoc,
-  addDoc,
 } from "firebase/firestore";
 import ScheduledMatches from "@/components/matchesComp/ScheduledMatches";
 
 const Matches = () => {
   const [userId, setUserId] = useState(null);
   const [teamData, setTeamData] = useState(null);
-  const [requests, setRequests] = useState([]);
   const [pastMatches, setPastMatches] = useState([]);
   const [futureMatches, setFutureMatches] = useState([]);
 
@@ -27,7 +23,6 @@ const Matches = () => {
         setUserId(user.uid);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -44,8 +39,6 @@ const Matches = () => {
             if (teamDoc.exists()) {
               setTeamData({ id: userTeamId, ...teamDoc.data() });
             }
-          } else {
-            setTeamData(null);
           }
         }
       } catch (error) {
@@ -61,40 +54,22 @@ const Matches = () => {
 
     const fetchMatches = async () => {
       try {
-        const requestsQuery = query(
-          collection(db, "matchRequests"),
-          where("receiverTeamId", "==", teamData.id),
-          where("status", "==", "pending")
+        const currentDate = new Date();
+        const today = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          currentDate.getDate()
         );
 
-        const receivedSnapshot = await getDocs(requestsQuery);
-
-        const allRequests = receivedSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setRequests(allRequests);
-      } catch (error) {
-        console.error("Maç istekleri alınırken hata oluştu:", error);
-      }
-    };
-
-    const fetchScheduledMatches = async () => {
-      try {
-        if (!teamData || !teamData.id) return;
-
-        const currentDate = new Date();
-
-        // Sadece kullanıcının takımına ait maçları al
+        // Maçları alıcı ve gönderici olarak sorgula
         const receivedMatchesQuery = query(
           collection(db, "matches"),
-          where("receiverTeamId", "==", teamData.id) // Kullanıcının takımı alıcıysa
+          where("receiverTeamId", "==", teamData.id)
         );
 
         const sentMatchesQuery = query(
           collection(db, "matches"),
-          where("senderTeamId", "==", teamData.id) // Kullanıcının takımı gönderense
+          where("senderTeamId", "==", teamData.id)
         );
 
         const [receivedSnapshot, sentSnapshot] = await Promise.all([
@@ -107,106 +82,51 @@ const Matches = () => {
           ...sentSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
         ];
 
-        // Maçları geçmiş ve gelecekteki olarak ayır
-        const past = allMatches.filter(
-          (match) => new Date(match.date.seconds * 1000) < currentDate
-        );
-        const future = allMatches.filter(
-          (match) => new Date(match.date.seconds * 1000) >= currentDate
-        );
+        // Maçları geçmiş ve gelecek olarak ayır (bugünü geçmiş saymaz)
+        const past = allMatches.filter((match) => {
+          const matchDate = new Date(match.date.seconds * 1000);
+          return matchDate < today; // Bugünü dahil etmez
+        }).map((match) => ({
+          ...match,
+          opponentTeamId:
+            match.senderTeamId === teamData.id
+              ? match.receiverTeamId
+              : match.senderTeamId,
+        }));
+
+        const future = allMatches.filter((match) => {
+          const matchDate = new Date(match.date.seconds * 1000);
+          return matchDate >= today; // Bugünü dahil eder
+        }).map((match) => ({
+          ...match,
+          opponentTeamId:
+            match.senderTeamId === teamData.id
+              ? match.receiverTeamId
+              : match.senderTeamId,
+        }));
 
         setPastMatches(past);
         setFutureMatches(future);
       } catch (error) {
-        console.error("Planlanmış maçlar alınırken hata oluştu:", error);
+        console.error("Maçlar alınırken hata oluştu:", error);
       }
     };
 
-
     fetchMatches();
-    fetchScheduledMatches();
   }, [teamData]);
-
-  const handleApprove = async (requestId) => {
-    try {
-      const requestRef = doc(db, "matchRequests", requestId);
-      const requestSnap = await getDoc(requestRef);
-
-      if (requestSnap.exists()) {
-        const requestData = requestSnap.data();
-
-        const matchesRef = collection(db, "matches");
-        await addDoc(matchesRef, {
-          senderTeamId: requestData.senderTeamId,
-          receiverTeamId: requestData.receiverTeamId,
-          field: requestData.field,
-          date: requestData.date,
-          time: requestData.time,
-          status: "scheduled",
-          createdAt: new Date(),
-        });
-
-        await deleteDoc(requestRef);
-        setRequests((prev) => prev.filter((req) => req.id !== requestId));
-        alert("Maç isteği onaylandı ve maç planlandı.");
-      }
-    } catch (error) {
-      console.error("Maç isteği onaylanırken hata oluştu:", error);
-    }
-  };
-
-  const handleReject = async (requestId) => {
-    try {
-      await deleteDoc(doc(db, "matchRequests", requestId));
-      setRequests((prev) => prev.filter((req) => req.id !== requestId));
-      alert("Maç isteği reddedildi.");
-    } catch (error) {
-      console.error("Maç isteği reddedilirken hata oluştu:", error);
-    }
-  };
 
   return (
     <div className="flex flex-col p-2">
       <h2 className="text-4xl font-bold">Maçlar</h2>
 
-      {teamData?.captainId === userId && (
-        <div className="flex flex-col justify-center items-center my-2">
-          {requests.length > 0 ? (
-            requests.map((req) => (
-              <div key={req.id} className="p-2 mb-2">
-                <p>
-                  {req.field} -{" "}
-                  {new Date(req.date.seconds * 1000).toLocaleDateString()} -{" "}
-                  {req.time}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    className="bg-green-500 text-white p-2 rounded"
-                    onClick={() => handleApprove(req.id)}
-                  >
-                    Onayla
-                  </button>
-                  <button
-                    className="bg-red-500 text-white p-2 rounded"
-                    onClick={() => handleReject(req.id)}
-                  >
-                    Reddet
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p></p>
-          )}
-        </div>
-      )}
-
       <div className="">
-        <ScheduledMatches matches={futureMatches} />
+        <h3 className="text-2xl font-semibold mb-4">Gelecek Maçlar</h3>
+        <ScheduledMatches matches={futureMatches} ownTeamId={teamData?.id} />
       </div>
 
       <div>
-        <ScheduledMatches matches={pastMatches} />
+        <h3 className="text-2xl font-semibold mb-4">Geçmiş Maçlar</h3>
+        <ScheduledMatches matches={pastMatches} ownTeamId={teamData?.id} />
       </div>
     </div>
   );

@@ -17,13 +17,32 @@ const MatchModal = ({ teamId, onClose }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedField, setSelectedField] = useState("");
-  const [date, setDate] = useState(null)
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const timeSlots = [
     "13:00-14:00",
     "14:00-15:00",
     "15:00-16:00",
     "16:00-17:00",
+    "17:00-18:00",
+    "18:00-19:00",
+    "19:00-20:00",
+    "20:00-21:00",
+    "22:00-23:00",
+    "23:00-24:00",
+    "00:00-01:00",
+    "01:00-02:00",
+    "02:00-03:00",
+    "03:00-04:00",
+    "04:00-05:00",
+    "05:00-06:00",
+    "06:00-07:00",
+    "07:00-08:00",
+    "08:00-09:00",
+    "09:00-10-00",
+    "10:00-11-00",
+    "11:00-12:00",
+    "12:00-13:00",
   ]; // Saat dilimleri
 
   const handleSendMatchRequest = async () => {
@@ -72,20 +91,25 @@ const MatchModal = ({ teamId, onClose }) => {
     }
   };
 
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setPopoverOpen(false); // Tarih seçildiğinde popover'ı kapat
+  };
+
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+      <div className="bg-background p-6 rounded-xl shadow-lg w-full max-w-md">
         <h2 className="text-lg font-bold mb-4">Maç İsteği Gönder</h2>
 
         <div className="mb-4">
           <label className="block font-bold mb-2">Tarih Seç</label>
-          <Popover>
+          <Popover open={isPopoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant={"outline"}
                 className={cn(
-                  "w-[280px] justify-start text-left font-normal",
+                  "w-[280px] justify-start text-left font-normal bg-white",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
@@ -97,8 +121,9 @@ const MatchModal = ({ teamId, onClose }) => {
               <Calendar
                 mode="single"
                 selected={selectedDate}
-                onSelect={setSelectedDate}
+                onSelect={handleDateSelect}
                 initialFocus
+                className="bg-foreground"
               />
             </PopoverContent>
           </Popover>
@@ -135,10 +160,10 @@ const MatchModal = ({ teamId, onClose }) => {
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>
+          <Button className="bg-button rounded-xl" variant="secondary" onClick={onClose}>
             Kapat
           </Button>
-          <Button onClick={handleSendMatchRequest}>Gönder</Button>
+          <Button className="bg-button rounded-xl" onClick={handleSendMatchRequest}>Gönder</Button>
         </div>
       </div>
     </div>

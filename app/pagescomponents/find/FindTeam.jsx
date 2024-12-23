@@ -113,10 +113,10 @@ const FindTeam = () => {
         <div className="flex flex-col gap-2">
           <div className="flex flex-row gap-2  items-center">
             <Select onValueChange={(value) => setSearchCity(value)}>
-              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+              <SelectTrigger className="w-40 bg-foreground border-none rounded-xl">
                 <SelectValue placeholder="Şehir Seç" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-400 border-none rounded-xl">
+              <SelectContent className="bg-foreground border-none rounded-xl">
                 <SelectGroup>
                   <SelectLabel>Şehirler</SelectLabel>
                   {cityData.map((city) => (
@@ -133,10 +133,10 @@ const FindTeam = () => {
               disabled={!searchCity}
 
             >
-              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+              <SelectTrigger className="w-40 bg-foreground border-none rounded-xl">
                 <SelectValue placeholder="İlçe Seç" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-400 border-none rounded-xl">
+              <SelectContent className="bg-foreground border-none rounded-xl">
                 <SelectGroup>
                   <SelectLabel>İlçeler</SelectLabel>
                   {cityData
@@ -149,7 +149,7 @@ const FindTeam = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-button">
               <Search size={40} strokeWidth={2.75} />
             </Button>
           </div>
@@ -163,11 +163,11 @@ const FindTeam = () => {
           <input
             type="text"
             placeholder="Takım Adı"
-            className="w-40 p-2 border rounded-xl bg-slate-400 border-none placeholder-slate-500"
+            className="w-40 p-2 border rounded-xl bg-foreground border-none placeholder-slate-500"
             value={searchTeamName}
             onChange={(e) => setSearchTeamName(e.target.value)}
           />
-          <Button onClick={handleTeamNameSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+          <Button onClick={handleTeamNameSearch} variant="outline" size="icon" className="rounded-xl bg-button">
             <Search size={40} strokeWidth={2.75} />
           </Button>
         </div>

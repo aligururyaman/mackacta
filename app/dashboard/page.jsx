@@ -31,126 +31,110 @@ import { collection, doc, getDoc, getDocs, query, where } from "firebase/firesto
 import { Button } from "@/components/ui/button";
 import MatchNotification from "@/components/notifications/MatchNotification";
 
-
-
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState(""); // Ana menü
   const [selectedSubItem, setSelectedSubItem] = useState(""); // Alt menü
   const [userName, setUserName] = useState(null);
   const [userSurName, setUserSurName] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const [showProfile, setShowProfile] = useState(false);
+  const [friendRequests, setFriendRequests] = useState([]);
   const [matchRequests, setMatchRequests] = useState([]);
+  const [teamRequests, setTeamRequests] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [requests, setRequests] = useState([]);
-
-
-
-  const fetchMatchRequests = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.log("Kullanıcı yok");
-        return;
-      }
-
-      // Kullanıcının takımını bul
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        console.log("Kullanıcının takımı bulunamadı.");
-        return;
-      }
-
-      const userTeamId = userDoc.data().teamId;
-      if (!userTeamId) {
-        console.log("Kullanıcının takıma ait ID'si yok.");
-        return;
-      }
-
-      // Kullanıcının takımı kaptan mı, yoksa başka bir rolde mi olduğunu kontrol edin
-      const teamDoc = await getDoc(doc(db, "teams", userTeamId));
-      if (!teamDoc.exists()) {
-        console.log("Takım dokümanı bulunamadı.");
-        return;
-      }
-
-      const teamData = teamDoc.data();
-
-      // Gelen ve gönderilen maç isteklerini bul
-      const receivedRequestsQuery = query(
-        collection(db, "matchRequests"),
-        where("receiverTeamId", "==", userTeamId), // Kullanıcının takımı alıcıysa
-        where("status", "==", "pending")
-      );
-
-      const sentRequestsQuery = query(
-        collection(db, "matchRequests"),
-        where("senderTeamId", "==", userTeamId), // Kullanıcının takımı gönderense
-        where("status", "==", "pending")
-      );
-
-      // Verileri paralel olarak çek
-      const [receivedSnapshot, sentSnapshot] = await Promise.all([
-        getDocs(receivedRequestsQuery),
-        getDocs(sentRequestsQuery),
-      ]);
-
-      // Gelen ve gönderilen istekleri birleştir
-      const allRequests = [
-        ...receivedSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-        ...sentSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-      ];
-
-      console.log("Fetched match requests:", allRequests);
-      setRequests(allRequests); // State'e set et
-    } catch (error) {
-      console.error("Match requests fetch error:", error);
-    }
-  };
-
-
-
-
-
-
-  useEffect(() => {
-    if (showNotifications) {
-      fetchMatchRequests(); // Bildirim paneli açıldığında veri çek
-    }
-  }, [showNotifications]);
-
-
-
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // Firestore'da kullanıcı dokümanını al
           const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setUserName(userData.name); // Kullanıcının adını ayarla
-            setUserSurName(userData.surname); // Kullanıcının soyadını ayarla
-            console.log(userName, userSurName);
+            setUserName(userData.name);
+            setUserSurName(userData.surname);
 
-          } else {
-            console.error("Kullanıcı dokümanı bulunamadı.");
+            // Bildirim verilerini çek
+            await fetchFriendRequests(user.uid);
+            await fetchMatchRequests(user.uid);
+            await fetchTeamRequests(user.uid);
           }
         } catch (error) {
           console.error("Kullanıcı bilgileri alınırken hata oluştu:", error);
         }
       } else {
-        router.push("/"); // Oturum yoksa yönlendirme
+        router.push("/"); // Kullanıcı giriş yapmamışsa yönlendir
       }
-      setLoading(false); // Yükleme tamamlandı
     });
 
-    return () => unsubscribe(); // Component unmount olduğunda dinleyiciyi kaldır
-  }, [auth, router]);
+    return () => unsubscribe();
+  }, []);
+
+  const fetchFriendRequests = async (userId) => {
+    try {
+      const requestsRef = collection(db, "friendRequests");
+      const q = query(
+        requestsRef,
+        where("receiverId", "==", userId),
+        where("status", "==", "pending")
+      );
+      const querySnapshot = await getDocs(q);
+
+      const requests = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setFriendRequests(requests);
+    } catch (error) {
+      console.error("Arkadaşlık istekleri alınırken hata oluştu:", error);
+    }
+  };
+
+  const fetchMatchRequests = async (userId) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", userId));
+      const userTeamId = userDoc.data()?.teamId;
+      if (!userTeamId) return;
+
+      const receivedRequestsQuery = query(
+        collection(db, "matchRequests"),
+        where("receiverTeamId", "==", userTeamId),
+        where("status", "==", "pending")
+      );
+
+      const receivedSnapshot = await getDocs(receivedRequestsQuery);
+      const allRequests = receivedSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMatchRequests(allRequests);
+    } catch (error) {
+      console.error("Maç istekleri alınırken hata oluştu:", error);
+    }
+  };
+
+  const fetchTeamRequests = async (userId) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", userId));
+      const userTeamId = userDoc.data()?.teamId;
+      if (!userTeamId) return;
+
+      const teamRequestsQuery = query(
+        collection(db, "teamRequests"),
+        where("teamId", "==", userTeamId),
+        where("status", "==", "pending")
+      );
+
+      const snapshot = await getDocs(teamRequestsQuery);
+      const allRequests = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTeamRequests(allRequests);
+    } catch (error) {
+      console.error("Takım istekleri alınırken hata oluştu:", error);
+    }
+  };
 
   const handleToggleNotifications = () => {
     setShowNotifications((prev) => !prev); // Bildirim panelini aç/kapat
@@ -191,15 +175,11 @@ export default function Dashboard() {
     return <div><Main /></div>;
   };
 
-  const goProfile = () => {
-    setShowProfile(true);
-  };
-
   return (
     <SidebarProvider>
       <AppSidebar onSelectMenu={handleMenuSelect} />
       <SidebarInset>
-        <header className="flex h-16 justify-between shrink-0 items-center gap-2 border-b px-4 bg-gray-800 text-lime-400 font-extrabold">
+        <header className="flex h-16 justify-between shrink-0 items-center gap-2 border-b px-4 bg-foreground text-slate-600 font-extrabold">
           <div className="flex flex-row justify-center items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -210,7 +190,7 @@ export default function Dashboard() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block font-semibold" />
                 <BreadcrumbItem >
-                  <BreadcrumbPage className="text-lime-400 font-bold">{selectedSubItem}</BreadcrumbPage>
+                  <BreadcrumbPage className="text-slate-500 font-bold">{selectedSubItem}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -224,16 +204,17 @@ export default function Dashboard() {
             >
               <div className="h-6 w-6 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
                 {/* Bildirim sayısı */}
-                {matchRequests.length}
+                {matchRequests?.length + friendRequests?.length + teamRequests?.length}
               </div>
             </div>
+
             {/* Kullanıcı Bilgileri */}
             <p className="font-semibold cursor-pointer">
               {userName} {userSurName}
             </p>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-600 relative">
+        <div className="flex flex-1 flex-col gap-4 p-4 bg-background relative">
           <div className="relative z-10">
             {renderContent()}
           </div>
@@ -241,30 +222,11 @@ export default function Dashboard() {
         <MatchNotification
           show={showNotifications}
           onClose={() => setShowNotifications(false)}
-          matchRequests={matchRequests} // Veriyi burada geçiriyoruz
+          matchRequests={matchRequests}
+          friendRequests={friendRequests}
+          teamRequests={teamRequests} // Takım istekleri eklendi
         />
-
       </SidebarInset>
-      {showProfile && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          role="dialog"
-          aria-labelledby="profile-modal-title"
-          aria-modal="true"
-        >
-          <div className="bg-white p-6 rounded-3xl shadow-lg w-1/2">
-            <h2 id="profile-modal-title" className="text-lg font-bold">
-              Kullanıcı Bilgileri
-            </h2>
-            <UserInfo />
-            <Button variant="secondary" onClick={() => setShowProfile(false)}>
-              Kapat
-            </Button>
-          </div>
-        </div>
-      )}
-
     </SidebarProvider>
-
   );
 }

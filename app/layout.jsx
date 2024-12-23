@@ -37,7 +37,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${poppinsBold.variable} ${poppinsBlack.variable} ${poppinsExtraBold.variable} ${poppinsLight.variable} ${poppinsSemiBold.variable} antialiased font-poppinsLight`}
+        className={`${poppinsBold.variable} ${poppinsBlack.variable} ${poppinsExtraBold.variable} ${poppinsLight.variable} ${poppinsSemiBold.variable} antialiased font-poppinsLight text-slate-700`}
       >
         {children}
       </body>

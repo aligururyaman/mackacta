@@ -220,48 +220,9 @@ export default function UserInfo() {
 
   return (
     <div className="flex flex-col font-poppinsLight justify-center ">
-      {/* <header className="flex">
-        <div className="flex items-center space-x-6 w-full">
-          <img
-            src={userData?.profileImage || "/placeholder.svg"}
-            alt="Profil Resmi"
-            width="96"
-            height="96"
-            className="rounded-full bg-gray-300 cursor-pointer border border-slate-400 shadow-xl"
-            onClick={() => document.getElementById("profileImageInput").click()}
-            style={{ aspectRatio: "96/96", objectFit: "cover" }}
-          />
-          <input
-            type="file"
-            id="profileImageInput"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageUpload}
-          />
-
-          <div className="space-y-1 items-center justify-center">
-            <h1 className="text-2xl font-bold">{userData?.name || "Bilgi Yok"} {userData?.surname || "Bilgi Yok"}</h1>
-          </div>
-        </div>
-      </header>
-      <div className="flex flex-col my-10 gap-3">
-        <div className="flex ">
-          <p><span className="font-semibold">Telefon :</span> {userData?.phone || "Bilgi Yok"}</p>
-        </div>
-        <div className="flex gap-10">
-          <p><span className="font-semibold">İl:</span> {userData?.city || "Bilgi Yok"}</p>
-          <p><span className="font-semibold">İlçe: </span> {userData?.district || "Bilgi Yok"}</p>
-        </div>
-        <div>
-          <p> <span className="font-semibold">Mevki:</span> {userData?.position || "Bilgi Yok"}</p>
-        </div>
-        <div>
-          <p> <span className="font-semibold">Takım:</span> {teamData ? teamData.name : "Takım Yok"}</p>
-        </div>
-      </div> */}
 
       <div className="flex flex-col justify-center items-center gap-5">
-        <div className="flex h-56 w-full bg-green-700 rounded-xl relative border-2 border-white">
+        <div className="flex h-56 w-full bg-green-600 rounded-xl relative border-2 border-white">
           {/* Orta Çizgi */}
           <div className="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 w-1 bg-white"></div>
 

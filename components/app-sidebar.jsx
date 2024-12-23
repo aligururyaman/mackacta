@@ -90,7 +90,7 @@ export function AppSidebar({ onSelectMenu, ...props }) {
 
   return (
     <>
-      <Sidebar {...props} className="bg-gray-800 text-lime-400 font-extrabold">
+      <Sidebar {...props} className="bg-foreground text-slate-600 font-extrabold">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>

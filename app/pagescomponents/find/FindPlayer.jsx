@@ -165,10 +165,10 @@ const FindPlayer = () => {
           <h3>Şehir ve İlçe ile Ara</h3>
           <div className="flex flex-row gap-2 items-center">
             <Select onValueChange={(value) => setSearchCity(value)}>
-              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+              <SelectTrigger className="w-40 bg-foreground border-none rounded-xl">
                 <SelectValue placeholder="Şehir Seç" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-400 border-none rounded-xl">
+              <SelectContent className="bg-foreground border-none rounded-xl">
                 <SelectGroup>
                   <SelectLabel>Şehirler</SelectLabel>
                   {cityData.map((city) => (
@@ -184,10 +184,10 @@ const FindPlayer = () => {
               onValueChange={(value) => setSearchDistrict(value)}
               disabled={!searchCity}
             >
-              <SelectTrigger className="w-40 bg-slate-400 border-none rounded-xl">
+              <SelectTrigger className="w-40 bg-foreground border-none rounded-xl">
                 <SelectValue placeholder="İlçe Seç" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-400 border-none rounded-xl">
+              <SelectContent className="bg-foreground border-none rounded-xl">
                 <SelectGroup>
                   <SelectLabel>İlçeler</SelectLabel>
                   {districts.map((district, index) => (
@@ -198,7 +198,7 @@ const FindPlayer = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-button">
               <Search size={40} strokeWidth={2.75} />
             </Button>
           </div>
@@ -209,18 +209,18 @@ const FindPlayer = () => {
             <input
               type="text"
               placeholder="Ad"
-              className="w-40 p-2 bg-slate-400 border-none placeholder-slate-500 rounded-xl"
+              className="w-40 p-2 bg-foreground border-none placeholder-slate-500 rounded-xl"
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
             />
             <input
               type="text"
               placeholder="Soyad"
-              className="w-40 p-2 bg-slate-400 border-none placeholder-slate-500 rounded-xl"
+              className="w-40 p-2 bg-foreground border-none placeholder-slate-500 rounded-xl"
               value={searchSurname}
               onChange={(e) => setSearchSurname(e.target.value)}
             />
-            <Button onClick={handleNameSearch} variant="outline" size="icon" className="rounded-xl bg-lime-400">
+            <Button onClick={handleNameSearch} variant="outline" size="icon" className="rounded-xl bg-button">
               <Search size={40} strokeWidth={2.75} />
             </Button>
           </div>
@@ -233,7 +233,7 @@ const FindPlayer = () => {
       <div className="flex flex-col w-96">
         <ul className="flex flex-col gap-4 ">
           {users.map((user, index) => (
-            <div key={user.id} className="p-4 flex flex-col md:flex-row  hover:bg-slate-400 dark:hover:bg-neutral-800 rounded-xl">
+            <div key={user.id} className="p-4 flex flex-col md:flex-row  hover:bg-neutral-400 dark:hover:bg-neutral-800 rounded-xl">
               <motion.div
                 layoutId={`card-${user.name}-${id}`}
                 key={`card-${user.name}-${id}`}

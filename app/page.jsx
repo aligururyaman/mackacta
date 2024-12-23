@@ -179,7 +179,7 @@ export default function Home() {
                 />
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-center">
               <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={handleSignUp}>Kayıt Ol</Button>
             </CardFooter>
           </Card>

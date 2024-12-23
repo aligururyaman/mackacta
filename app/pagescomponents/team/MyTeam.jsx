@@ -310,54 +310,48 @@ export default function MyTeam() {
           {members.length > 0 && (
             <div>
               <h2 className="text-lg font-bold">Takımım</h2>
-              <div className="flex flex-wrap w-96">
+              <div className="flex flex-wrap">
                 <ul className="flex w-full flex-wrap gap-4">
-                  {members.map((member, index) => (
-                    <div
-                      key={member.id}
-                      className="p-4 flex flex-col md:flex-row text-md hover:bg-slate-400 dark:hover:bg-neutral-800 rounded-xl"
-                    >
-                      <motion.div
-                        layoutId={`card-${member.name}-${member.id}`}
-                        key={`card-${member.name}-${member.id}`}
-                        onClick={() => setSelectedMember(member)}
-                        className="flex w-96 cursor-pointer"
+                  {members
+                    .sort((a, b) => (a.id === teamData.captainId ? -1 : b.id === teamData.captainId ? 1 : 0))
+                    .map((member, index) => (
+                      <div
+                        key={member.id}
+                        className="p-4 flex flex-col md:flex-row text-md  items-center w-full md:w-auto hover:bg-slate-400 dark:hover:bg-neutral-800 rounded-xl"
                       >
-                        <div className="flex gap-4 flex-row items-center">
-                          <motion.div layoutId={`image-${member.name}-${member.id}`}>
-                            <img
-                              className="w-16 h-16 rounded-full bg-gray-300 object-cover"
-                              src={member.profileImage || "/placeholder.png"}
-                              alt="Profil Resmi"
-                            />
-                          </motion.div>
-                          <div className="">
-                            <motion.h3
-                              layoutId={`title-${member.name}-${member.id}`}
-                              className="font-medium text-neutral-900 dark:text-neutral-200 text-left"
-                            >
-                              {capitalizeWords(member.name)} {capitalizeWords(member.surname)}
-                            </motion.h3>
-                            <p className="text-sm text-gray-600">
-                              {member.id === teamData.captainId ? (
-                                <span className="text-green-700 font-bold">Kaptan</span>
-                              ) : (
-                                "Oyuncu"
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                      {auth.currentUser?.uid === teamData?.captainId && member.id !== teamData?.captainId && (
-                        <Button
-                          className="rounded-xl bg-button hover:bg-background hover:text-white border-none"
-                          onClick={() => handleRemovePlayer(member.id, member.name)}
+                        <motion.div
+                          layoutId={`card-${member.name}-${member.id}`}
+                          key={`card-${member.name}-${member.id}`}
+                          onClick={() => setSelectedMember(member)}
+                          className="flex md:w-80 w-full cursor-pointer"
                         >
-                          Oyuncuyu At
-                        </Button>
-                      )}
-                    </div>
-                  ))}
+                          <div className="flex gap-4 flex-row">
+                            <motion.div layoutId={`image-${member.name}-${member.id}`}>
+                              <img
+                                className="w-16 h-16 rounded-full bg-gray-300 object-cover"
+                                src={member.profileImage || "/placeholder.png"}
+                                alt="Profil Resmi"
+                              />
+                            </motion.div>
+                            <div className="">
+                              <motion.h3
+                                layoutId={`title-${member.name}-${member.id}`}
+                                className="font-medium text-neutral-900 dark:text-neutral-200 text-left"
+                              >
+                                {capitalizeWords(member.name)} {capitalizeWords(member.surname)}
+                              </motion.h3>
+                              <p className="text-sm text-gray-600">
+                                {member.id === teamData.captainId ? (
+                                  <span className="text-green-700 font-bold">Kaptan</span>
+                                ) : (
+                                  "Oyuncu"
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </div>
+                    ))}
                 </ul>
 
                 <AnimatePresence>
@@ -373,7 +367,7 @@ export default function MyTeam() {
                         initial={{ scale: 0.9 }}
                         animate={{ scale: 1 }}
                         exit={{ scale: 0.9 }}
-                        className="bg-white rounded-xl dark:bg-neutral-800 p-6  w-96 flex flex-col items-center gap-1"
+                        className="bg-white rounded-xl dark:bg-neutral-800 p-6 w-96 flex flex-col items-center gap-1"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <img
@@ -383,8 +377,7 @@ export default function MyTeam() {
                         />
                         <div className="flex flex-col items-center my-2">
                           <p>
-                            {capitalizeWords(selectedMember.name)}{" "}
-                            {capitalizeWords(selectedMember.surname)}
+                            {capitalizeWords(selectedMember.name)} {capitalizeWords(selectedMember.surname)}
                           </p>
                           <p>Telefon: {selectedMember.phone || "Belirtilmemiş"}</p>
                           <p>Mevki: {selectedMember.position || "Belirtilmemiş"}</p>
@@ -392,7 +385,6 @@ export default function MyTeam() {
                         <div className="flex flex-row gap-4">
                           {auth.currentUser?.uid === teamData?.captainId &&
                             selectedMember.id !== teamData?.captainId && (
-
                               <motion.button
                                 className="rounded-xl p-2 bg-button hover:bg-background hover:text-white border-none"
                                 onClick={() => handleRemovePlayer(selectedMember.id, selectedMember.name)}
@@ -400,7 +392,6 @@ export default function MyTeam() {
                                 Oyuncuyu At
                               </motion.button>
                             )}
-
                           <Button
                             className="rounded-xl bg-button hover:bg-background hover:text-white border-none"
                             onClick={() => setSelectedMember(null)}

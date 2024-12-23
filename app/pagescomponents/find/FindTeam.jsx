@@ -149,7 +149,7 @@ const FindTeam = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-button">
+            <Button onClick={handleCityDistrictSearch} variant="outline" size="icon" className="rounded-xl bg-button hover:bg-background hover:text-white border-none" >
               <Search size={40} strokeWidth={2.75} />
             </Button>
           </div>
@@ -167,7 +167,7 @@ const FindTeam = () => {
             value={searchTeamName}
             onChange={(e) => setSearchTeamName(e.target.value)}
           />
-          <Button onClick={handleTeamNameSearch} variant="outline" size="icon" className="rounded-xl bg-button">
+          <Button onClick={handleTeamNameSearch} variant="outline" size="icon" className="rounded-xl bg-button hover:bg-background hover:text-white border-none" >
             <Search size={40} strokeWidth={2.75} />
           </Button>
         </div>

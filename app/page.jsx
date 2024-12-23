@@ -125,12 +125,12 @@ export default function Home() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-center">
-              <Button className="rounded-xl bg-button" onClick={handleSignIn}>Giriş Yap</Button>
+              <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={handleSignIn}>Giriş Yap</Button>
             </CardFooter>
           </Card>
         </TabsContent>
         <TabsContent value="SignUp">
-          <Card className="bg-gray-600 border-none rounded-xl shadow-xl">
+          <Card className="bg-foreground border-none rounded-xl shadow-xl">
             <CardHeader>
               <CardTitle>Kayıt Ol</CardTitle>
               <CardDescription>Dünyamızı keşfetmek için kayıt ol.</CardDescription>
@@ -143,6 +143,7 @@ export default function Home() {
                   placeholder="İsim"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="rounded-xl border-none bg-button"
                 />
               </div>
 
@@ -153,6 +154,7 @@ export default function Home() {
                   placeholder="Soyad"
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
+                  className="rounded-xl border-none bg-button"
                 />
               </div>
 
@@ -163,6 +165,7 @@ export default function Home() {
                   placeholder="@xxx.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="rounded-xl border-none bg-button"
                 />
               </div>
               <div className="space-y-1">
@@ -172,11 +175,12 @@ export default function Home() {
                   placeholder="Şifre"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="rounded-xl border-none bg-button"
                 />
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="rounded-xl bg-lime-400 hover:bg-green-100" onClick={handleSignUp}>Kayıt Ol</Button>
+              <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={handleSignUp}>Kayıt Ol</Button>
             </CardFooter>
           </Card>
         </TabsContent>

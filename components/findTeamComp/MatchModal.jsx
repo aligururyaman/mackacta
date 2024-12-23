@@ -160,10 +160,10 @@ const MatchModal = ({ teamId, onClose }) => {
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button className="bg-button rounded-xl" variant="secondary" onClick={onClose}>
+          <Button className="rounded-xl bg-button hover:bg-foreground hover:text-white" variant="secondary" onClick={onClose}>
             Kapat
           </Button>
-          <Button className="bg-button rounded-xl" onClick={handleSendMatchRequest}>Gönder</Button>
+          <Button className="rounded-xl bg-button hover:bg-foreground hover:text-white" onClick={handleSendMatchRequest}>Gönder</Button>
         </div>
       </div>
     </div>

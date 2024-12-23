@@ -73,21 +73,36 @@ function MatchNotification({ show, onClose }) {
         const user = auth.currentUser;
         if (!user) return;
 
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (!userDoc.exists()) return;
+        const userId = user.uid;
 
-        const userTeamId = userDoc.data().teamId;
-
+        // Arkadaşlık isteklerini getir (her kullanıcı görebilir)
         const friendRequests = await fetchRequests(
           "friendRequests",
           [
-            { field: "receiverId", op: "==", value: user.uid },
+            { field: "receiverId", op: "==", value: userId },
             { field: "status", op: "==", value: "pending" },
           ],
           "friend"
         );
         setFriendRequests(friendRequests);
 
+        // Kullanıcının bir takım kaptanı olup olmadığını kontrol et
+        const teamSnapshot = await getDocs(
+          query(collection(db, "teams"), where("captainId", "==", userId))
+        );
+
+        if (teamSnapshot.empty) {
+          // Kullanıcı takım kaptanı değilse, takım ve maç isteklerini temizle
+          setTeamRequests([]);
+          setMatchRequests([]);
+          return;
+        }
+
+        // Kullanıcı bir takım kaptanıysa, takım ID'sini al
+        const teamData = teamSnapshot.docs[0].data();
+        const userTeamId = teamSnapshot.docs[0].id;
+
+        // Maç isteklerini getir (sadece takım kaptanları görebilir)
         const matchRequests = await fetchRequests(
           "matchRequests",
           [
@@ -98,6 +113,7 @@ function MatchNotification({ show, onClose }) {
         );
         setMatchRequests(matchRequests);
 
+        // Takım katılma isteklerini getir (sadece takım kaptanları görebilir)
         const teamRequests = await fetchRequests(
           "teamRequests",
           [
@@ -108,13 +124,11 @@ function MatchNotification({ show, onClose }) {
         );
         setTeamRequests(teamRequests);
 
-        const teamId = userDoc.data().teamId;
-        setUserTeamId(teamId); // userTeamId burada güncellenir
-
+        setUserTeamId(userTeamId); // Kullanıcının takım ID'sini kaydet
       })();
-
     }
   }, [show]);
+
 
 
   const handleRequestAction = async (requestId, type, action, additionalData = {}) => {
@@ -216,10 +230,10 @@ function MatchNotification({ show, onClose }) {
                   sizi arkadaş olarak ekledi.
                 </span>
                 <div className="flex flex-row gap-4">
-                  <Button className="bg-button rounded-xl" onClick={() => handleRequestAction(request.id, "friend", "accept")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "friend", "accept")}>
                     Kabul Et
                   </Button>
-                  <Button className="bg-button rounded-xl" onClick={() => handleRequestAction(request.id, "friend", "reject")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "friend", "reject")}>
                     Reddet
                   </Button>
                 </div>
@@ -235,10 +249,10 @@ function MatchNotification({ show, onClose }) {
                   <strong>{request.senderTeamName || "Bilinmiyor"}</strong> sizinle maç yapmak istiyor.
                 </span>
                 <div className="flex flex-row gap-4">
-                  <Button className="bg-button rounded-xl" onClick={() => handleRequestAction(request.id, "match", "accept")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "match", "accept")}>
                     Kabul Et
                   </Button>
-                  <Button className="bg-button rounded-xl" onClick={() => handleRequestAction(request.id, "match", "reject")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "match", "reject")}>
                     Reddet
                   </Button>
                 </div>
@@ -253,7 +267,8 @@ function MatchNotification({ show, onClose }) {
                 <strong>{request.senderName} {request.senderSurname}</strong> takıma katılmak istiyor.
               </span>
               <div className="flex flex-row gap-4">
-                <Button className="bg-button rounded-xl"
+                <Button
+                  className="rounded-xl bg-button hover:bg-background hover:text-white"
                   onClick={() =>
                     handleRequestAction(request.id, "team", "accept", {
                       senderId: request.senderId,
@@ -263,7 +278,7 @@ function MatchNotification({ show, onClose }) {
                 >
                   Kabul Et
                 </Button>
-                <Button className="bg-button rounded-xl" onClick={() => handleRequestAction(request.id, "team", "reject")}>
+                <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "team", "reject")}>
                   Reddet
                 </Button>
 

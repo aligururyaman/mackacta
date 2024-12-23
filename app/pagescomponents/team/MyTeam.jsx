@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { auth, db } from "@/utils/firebase";
 import { doc, getDoc, setDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
@@ -217,7 +218,7 @@ export default function MyTeam() {
           <p>Takım oluşturmak için TAKIM KUR seçeneğini kullanabilirsiniz.</p>
           <Sheet>
             <SheetTrigger asChild>
-              <Button className="bg-foreground rounded-xl">Takım Kur</Button>
+              <Button className="rounded-xl bg-button hover:bg-foreground hover:text-white border-none">Takım Kur</Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
@@ -284,7 +285,7 @@ export default function MyTeam() {
         <div className="flex flex-col gap-10">
           <div className="flex items-center justify-center ">
 
-            <div className="p-4 flex flex-col items-center justify-center bg-slate-500 sm:w-96 rounded-xl  shadow-xl relative ">
+            <div className="p-4 flex flex-col items-center justify-center bg-foreground text-slate-800 sm:w-96 rounded-xl  shadow-xl relative ">
 
               <div className="flex flex-col justify-center items-center">
                 <img
@@ -304,95 +305,114 @@ export default function MyTeam() {
               </div>
             </div>
           </div>
+
+
           {members.length > 0 && (
             <div>
               <h2 className="text-lg font-bold">Takımım</h2>
-              {members.length > 0 && (
-                <div className="mt-6 font-semibold">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-gray-400">
-                        <TableHead>Profil Resmi</TableHead>
-                        <TableHead>Ad</TableHead>
-                        <TableHead>Telefon</TableHead>
-                        <TableHead className="hidden md:flex">İl</TableHead>
-                        <TableHead className="hidden md:flex">İlçe</TableHead>
-                        <TableHead>Rol</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {members
-                        .sort((a, b) => (a.id === teamData.captainId ? -1 : b.id === teamData.captainId ? 1 : 0)).map((member) => (
-                          <TableRow
-                            key={member.id}
-                            onClick={() => setSelectedMember(member)}
-                            className="cursor-pointer"
-                          >
-                            <TableCell>
-                              <img
-                                src={member.profileImage || "/placeholder.png"}
-                                alt="Profil Resmi"
-                                className="sm:w-14 sm:h-14 w-10 h-10 rounded-full object-cover"
-                              />
-                            </TableCell>
-                            <TableCell>
+              <div className="flex flex-wrap w-96">
+                <ul className="flex w-full flex-wrap gap-4">
+                  {members.map((member, index) => (
+                    <div
+                      key={member.id}
+                      className="p-4 flex flex-col md:flex-row text-md hover:bg-slate-400 dark:hover:bg-neutral-800 rounded-xl"
+                    >
+                      <motion.div
+                        layoutId={`card-${member.name}-${member.id}`}
+                        key={`card-${member.name}-${member.id}`}
+                        onClick={() => setSelectedMember(member)}
+                        className="flex w-96 cursor-pointer"
+                      >
+                        <div className="flex gap-4 flex-row items-center">
+                          <motion.div layoutId={`image-${member.name}-${member.id}`}>
+                            <img
+                              className="w-16 h-16 rounded-full bg-gray-300 object-cover"
+                              src={member.profileImage || "/placeholder.png"}
+                              alt="Profil Resmi"
+                            />
+                          </motion.div>
+                          <div className="">
+                            <motion.h3
+                              layoutId={`title-${member.name}-${member.id}`}
+                              className="font-medium text-neutral-900 dark:text-neutral-200 text-left"
+                            >
                               {capitalizeWords(member.name)} {capitalizeWords(member.surname)}
-                            </TableCell>
-                            <TableCell >{member.phone || "Belirtilmemiş"}</TableCell>
-                            <TableCell className="hidden md:flex">{capitalizeWords(member.city)}</TableCell>
-                            <TableCell className="hidden md:flex">{capitalizeWords(member.district)}</TableCell>
-                            <TableCell>
+                            </motion.h3>
+                            <p className="text-sm text-gray-600">
                               {member.id === teamData.captainId ? (
                                 <span className="text-green-700 font-bold">Kaptan</span>
                               ) : (
-                                <Button
-                                  variant="outline"
-                                  onClick={() => handleRemovePlayer(member.id, member.name)}
-                                >
-                                  Oyuncuyu At
-                                </Button>
+                                "Oyuncu"
                               )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-
-              {/* Sheet for Selected Member */}
-              {selectedMember && (
-                <Sheet open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>{capitalizeWords(selectedMember.name)} {capitalizeWords(selectedMember.surname)}</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-4 flex flex-col items-center">
-                      <img
-                        src={selectedMember.profileImage || "/placeholder.png"}
-                        alt="Profil Resmi"
-                        className="w-32 h-32 rounded-full object-cover"
-                      />
-                      <p><strong>Telefon:</strong> {selectedMember.phone || "Bilgi Yok"}</p>
-                      <p><strong>İl:</strong> {capitalizeWords(selectedMember.city)}</p>
-                      <p><strong>İlçe:</strong> {capitalizeWords(selectedMember.district)}</p>
-                      <p><strong>Mevki:</strong> {selectedMember.position || "Bilgi Yok"}</p>
-                    </div>
-                    {auth.currentUser.uid === selectedMember.id ? (
-                      <p className="mt-4 text-blue-500"></p>
-                    ) : (
-                      <div className="mt-4 flex items-center justify-center">
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                      {auth.currentUser?.uid === teamData?.captainId && member.id !== teamData?.captainId && (
                         <Button
-                          disabled={selectedMember.isFriend} // Eğer arkadaşsa buton devre dışı
-                          onClick={() => handleSendFriendRequest(selectedMember.id)}
+                          className="rounded-xl bg-button hover:bg-background hover:text-white border-none"
+                          onClick={() => handleRemovePlayer(member.id, member.name)}
                         >
-                          {selectedMember.isFriend ? "Arkadaşsınız" : "Arkadaş Ekle"}
+                          Oyuncuyu At
                         </Button>
-                      </div>
-                    )}
-                  </SheetContent>
-                </Sheet>
-              )}
+                      )}
+                    </div>
+                  ))}
+                </ul>
+
+                <AnimatePresence>
+                  {selectedMember && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                      onClick={() => setSelectedMember(null)}
+                    >
+                      <motion.div
+                        initial={{ scale: 0.9 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0.9 }}
+                        className="bg-white rounded-xl dark:bg-neutral-800 p-6  w-96 flex flex-col items-center gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <img
+                          className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                          src={selectedMember.profileImage || "/placeholder.png"}
+                          alt="Profil Resmi"
+                        />
+                        <div className="flex flex-col items-center my-2">
+                          <p>
+                            {capitalizeWords(selectedMember.name)}{" "}
+                            {capitalizeWords(selectedMember.surname)}
+                          </p>
+                          <p>Telefon: {selectedMember.phone || "Belirtilmemiş"}</p>
+                          <p>Mevki: {selectedMember.position || "Belirtilmemiş"}</p>
+                        </div>
+                        <div className="flex flex-row gap-4">
+                          {auth.currentUser?.uid === teamData?.captainId &&
+                            selectedMember.id !== teamData?.captainId && (
+
+                              <motion.button
+                                className="rounded-xl p-2 bg-button hover:bg-background hover:text-white border-none"
+                                onClick={() => handleRemovePlayer(selectedMember.id, selectedMember.name)}
+                              >
+                                Oyuncuyu At
+                              </motion.button>
+                            )}
+
+                          <Button
+                            className="rounded-xl bg-button hover:bg-background hover:text-white border-none"
+                            onClick={() => setSelectedMember(null)}
+                          >
+                            Kapat
+                          </Button>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
         </div>

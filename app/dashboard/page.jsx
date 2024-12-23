@@ -40,7 +40,9 @@ export default function Dashboard() {
   const [matchRequests, setMatchRequests] = useState([]);
   const [teamRequests, setTeamRequests] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [teamData, setTeamData] = useState(null); // Takım verisi
   const router = useRouter();
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -54,10 +56,21 @@ export default function Dashboard() {
             setUserName(userData.name);
             setUserSurName(userData.surname);
 
-            // Bildirim verilerini çek
+            // Kullanıcının takım bilgilerini al
+            await fetchTeamData(user.uid);
+
+            // Arkadaşlık isteklerini çek
             await fetchFriendRequests(user.uid);
-            await fetchMatchRequests(user.uid);
-            await fetchTeamRequests(user.uid);
+
+            // Maç isteklerini ve takım isteklerini sadece kaptansa çek
+            if (userData.teamId && teamData?.captainId === user.uid) {
+              await fetchMatchRequests(user.uid);
+              await fetchTeamRequests(user.uid);
+            } else {
+              // Eğer kullanıcı kaptan değilse, bu istekleri temizle
+              setMatchRequests([]);
+              setTeamRequests([]);
+            }
           }
         } catch (error) {
           console.error("Kullanıcı bilgileri alınırken hata oluştu:", error);
@@ -68,7 +81,23 @@ export default function Dashboard() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [teamData]);
+
+  const fetchTeamData = async (userId) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", userId));
+      const userTeamId = userDoc.data()?.teamId;
+
+      if (!userTeamId) return;
+
+      const teamDoc = await getDoc(doc(db, "teams", userTeamId));
+      if (teamDoc.exists()) {
+        setTeamData({ id: teamDoc.id, ...teamDoc.data() });
+      }
+    } catch (error) {
+      console.error("Takım verileri alınırken hata oluştu:", error);
+    }
+  };
 
   const fetchFriendRequests = async (userId) => {
     try {
@@ -96,22 +125,26 @@ export default function Dashboard() {
       const userTeamId = userDoc.data()?.teamId;
       if (!userTeamId) return;
 
-      const receivedRequestsQuery = query(
+      // Kullanıcının takımıyla eşleşen maç isteklerini çek
+      const matchRequestsQuery = query(
         collection(db, "matchRequests"),
         where("receiverTeamId", "==", userTeamId),
         where("status", "==", "pending")
       );
 
-      const receivedSnapshot = await getDocs(receivedRequestsQuery);
-      const allRequests = receivedSnapshot.docs.map((doc) => ({
+      const matchRequestsSnapshot = await getDocs(matchRequestsQuery);
+
+      const matchRequestsData = matchRequestsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setMatchRequests(allRequests);
+
+      setMatchRequests(matchRequestsData);
     } catch (error) {
       console.error("Maç istekleri alınırken hata oluştu:", error);
     }
   };
+
 
   const fetchTeamRequests = async (userId) => {
     try {
@@ -202,10 +235,17 @@ export default function Dashboard() {
               className="relative cursor-pointer"
               onClick={handleToggleNotifications}
             >
-              <div className="h-6 w-6 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
+              <div>
                 {/* Bildirim sayısı */}
-                {matchRequests?.length + friendRequests?.length + teamRequests?.length}
+                {(matchRequests?.length >= 1 || friendRequests?.length >= 1 ||
+                  (auth.currentUser?.uid === teamData?.captainId && teamRequests?.length >= 1)) && (
+                    <span className="h-6 w-6 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
+                      {matchRequests?.length + friendRequests?.length +
+                        (auth.currentUser?.uid === teamData?.captainId ? teamRequests?.length : 0)}
+                    </span>
+                  )}
               </div>
+
             </div>
 
             {/* Kullanıcı Bilgileri */}

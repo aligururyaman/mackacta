@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/utils/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import main from '@/app/assets/main/main.png'
+import logo from '@/app/assets/logo/logo.png'
 import Image from "next/image";
 
 export default function Home() {
@@ -86,38 +86,17 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-600">
-      <motion.h1
-        initial={{
-          opacity: 0,
-          y: 20,
-        }}
-        animate={{
-          opacity: 1,
-          y: [20, -5, 0],
-        }}
-        transition={{
-          duration: 0.5,
-          ease: [0.4, 0.0, 0.2, 1],
-        }}
-        className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto h-40"
-      >
-        {" "}
-        <div>
-          <Highlight className="text-black dark:text-white">
-            Rakip Bul - Takım Arkadaşı Bul OYNA!
-          </Highlight>
-        </div>
-
-      </motion.h1>
-
+    <div className="flex flex-col items-center justify-center h-screen bg-background">
+      <div className="flex mb-10">
+        <Image src={logo} alt="logo" height={200} width={200} />
+      </div>
       <Tabs defaultValue="SignIn" className="w-[400px] bg-none rounded-xl">
-        <TabsList className="grid w-full grid-cols-2 bg-gray-300">
-          <TabsTrigger value="SignIn" className="bg-gray-600">Giriş Yap</TabsTrigger>
-          <TabsTrigger value="SignUp" className="bg-gray-600">Hesap Oluştur</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-foreground rounded-xl gap-1">
+          <TabsTrigger value="SignIn" className="bg-button rounded-xl">Giriş Yap</TabsTrigger>
+          <TabsTrigger value="SignUp" className="bg-button rounded-xl">Hesap Oluştur</TabsTrigger>
         </TabsList>
         <TabsContent value="SignIn" >
-          <Card className="bg-gray-600 border-none rounded-xl shadow-xl">
+          <Card className="bg-foreground border-none rounded-xl shadow-xl">
             <CardHeader>
               <CardTitle>Giriş Yap</CardTitle>
               <CardDescription>Dünyamızı keşfetmek için giriş yap.</CardDescription>
@@ -130,6 +109,7 @@ export default function Home() {
                   placeholder="@xxx.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="rounded-xl border-none bg-button"
                 />
               </div>
               <div className="space-y-1">
@@ -140,11 +120,12 @@ export default function Home() {
                   placeholder="Şifre"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="rounded-xl border-none bg-button"
                 />
               </div>
             </CardContent>
-            <CardFooter>
-              <Button className="rounded-xl bg-lime-400 hover:bg-green-100" onClick={handleSignIn}>Giriş Yap</Button>
+            <CardFooter className="flex justify-center">
+              <Button className="rounded-xl bg-button" onClick={handleSignIn}>Giriş Yap</Button>
             </CardFooter>
           </Card>
         </TabsContent>

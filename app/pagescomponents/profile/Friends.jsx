@@ -109,15 +109,15 @@ export default function Friends() {
   return (
     <div>
       <p className="text-2xl font-extrabold">Arkadaşlar</p>
-      <div className="flex flex-wrap w-96">
+      <div className="flex flex-wrap">
         <ul className="flex w-full flex-wrap gap-4 ">
           {friends.map((user, index) => (
-            <div key={user.id} className="p-4 flex flex-col md:flex-row text-md hover:bg-slate-400 dark:hover:bg-neutral-800 rounded-xl">
+            <div key={user.id} className="p-4 flex flex-col md:flex-row text-md  items-center w-full md:w-auto hover:bg-slate-400 dark:hover:bg-neutral-800 rounded-xl">
               <motion.div
                 layoutId={`card-${user.name}-${id}`}
                 key={`card-${user.name}-${id}`}
                 onClick={() => setActive(user)}
-                className="flex w-96 cursor-pointer"
+                className="flex md:w-80 w-full cursor-pointer"
               >
                 <div className="flex gap-4 flex-row items-center ">
                   <motion.div layoutId={`image-${user.name}-${id}`}>

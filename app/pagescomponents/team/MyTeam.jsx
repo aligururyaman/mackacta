@@ -216,7 +216,7 @@ export default function MyTeam() {
         <div>
           <h2 className="text-lg font-bold">Takımınız yok</h2>
           <p>Takım oluşturmak için TAKIM KUR seçeneğini kullanabilirsiniz.</p>
-          <Sheet>
+          <Sheet className="bg-foreground">
             <SheetTrigger asChild>
               <Button className="rounded-xl bg-button hover:bg-foreground hover:text-white border-none">Takım Kur</Button>
             </SheetTrigger>
@@ -230,6 +230,7 @@ export default function MyTeam() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Takım adı girin"
+                  className="w-full p-2 border rounded-xl bg-button border-none placeholder-slate-500"
                 />
                 <Label>Şehir:</Label>
                 <Select
@@ -237,10 +238,10 @@ export default function MyTeam() {
                     setFormData((prev) => ({ ...prev, city: value, district: "" }));
                   }}
                 >
-                  <SelectTrigger className="w-full max-w-xs">
+                  <SelectTrigger className="w-full bg-button border-none rounded-xl">
                     <SelectValue placeholder="Şehir Seç" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full bg-button border-none rounded-xl">
                     <SelectGroup>
                       <SelectLabel>Şehirler</SelectLabel>
                       {cityData.map((city) => (
@@ -258,10 +259,10 @@ export default function MyTeam() {
                   }
                   disabled={!formData.city}
                 >
-                  <SelectTrigger className="w-full max-w-xs mt-4">
+                  <SelectTrigger className="w-full bg-button border-none rounded-xl">
                     <SelectValue placeholder="İlçe Seç" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full bg-button border-none rounded-xl">
                     <SelectGroup>
                       <SelectLabel>İlçeler</SelectLabel>
                       {districts.map((district, index) => (
@@ -273,11 +274,14 @@ export default function MyTeam() {
                   </SelectContent>
                 </Select>
                 <Label>Takım Resmi:</Label>
-                <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                <Input type="file" accept="image/*" onChange={handleImageUpload} className="w-full bg-button border-none rounded-xl text-slate-800" />
               </div>
-              <SheetFooter>
-                <Button onClick={handleCreateTeam}>Kaydet</Button>
-              </SheetFooter>
+              <div className="flex justify-center p-4">
+                <SheetFooter className="">
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white border-none" onClick={handleCreateTeam}>Kaydet</Button>
+                </SheetFooter>
+              </div>
+
             </SheetContent>
           </Sheet>
         </div>

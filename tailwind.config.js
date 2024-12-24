@@ -14,9 +14,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#d6e0eb",
-        foreground: "#c3ceda",
-        button: "#ebf5ff",
+        background: "#D3F1DF",
+        foreground: "#5DB996",
+        button: "#D3F1DF",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -55,11 +55,6 @@ module.exports = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
       },
       screens: {
         // Responsive breakpoints (custom breakpoints)

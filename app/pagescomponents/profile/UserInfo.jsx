@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import Image from "next/image";
 
 const capitalizeWords = (str) => {
   return str
@@ -219,37 +220,27 @@ export default function UserInfo() {
 
 
   return (
-    <div className="flex flex-col font-poppinsLight justify-center ">
 
-      <div className="flex flex-col justify-center items-center gap-5">
-        <div className="flex h-56 w-full bg-green-600 rounded-xl relative border-2 border-white">
-          {/* Orta Çizgi */}
-          <div className="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 w-1 bg-white"></div>
 
-          {/* Merkez Çember */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-2 border-white rounded-full"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full"></div>
+    <div className="relative w-full max-w-4xl bg-white shadow-xl rounded-lg p-6">
 
-          {/* Kale ve Ceza Sahaları (Sağ) */}
-          <div className="absolute top-1/4 right-12 border-r-0 transform translate-x-full w-12 h-1/2 border-2 border-white rounded-l-lg"></div>
-          <div className="absolute top-1/3 right-6 border-r-0 transform translate-x-full w-6 h-1/3 border-2 border-white rounded-l-lg"></div>
-          <div className="absolute top-2/4 -right-6 border-r-0 border-t-0 border-b-0 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-white rounded-full"></div>
-
-          {/* Kale ve Ceza Sahaları (Sol) */}
-          <div className="absolute top-1/4 left-12 border-l-0 transform -translate-x-full w-12 h-1/2 border-2 border-white rounded-r-lg"></div>
-          <div className="absolute top-1/3 left-6 border-l-0 transform -translate-x-full w-6 h-1/3 border-2 border-white rounded-r-lg"></div>
-          <div className="absolute top-2/4 left-10 border-l-0 border-t-0 border-b-0 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-white rounded-full"></div>
+      <div >
+        <div className="relative h-48 w-full rounded-lg overflow-hidden">
+          <Image
+            src="https://images.unsplash.com/photo-1604513896387-78c36ee80657?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3"
+            alt="Background"
+            className="object-cover"
+            fill
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-30"></div>
         </div>
 
-        <div className="flex justify-center">
+        <div className="relative -top-12 flex flex-col md:flex-row items-center gap-6">
           <img
             src={userData?.profileImage || "/placeholder.svg"}
             alt="Profil Resmi"
-            width="250"
-            height="250"
-            className="rounded-full bg-gray-300 cursor-pointer border border-slate-400 shadow-xl absolute top-24 items-center"
+            className="w-32 h-32 rounded-full border-4 border-white shadow-md cursor-pointer"
             onClick={() => document.getElementById("profileImageInput").click()}
-            style={{ aspectRatio: "96/96", objectFit: "cover" }}
           />
           <input
             type="file"
@@ -258,197 +249,193 @@ export default function UserInfo() {
             className="hidden"
             onChange={handleImageUpload}
           />
-          <div className="space-y-1 items-center justify-center mt-40">
-            <h1 className="text-4xl font-bold">{userData?.name || "Bilgi Yok"} {userData?.surname || "Bilgi Yok"}</h1>
+          <div className="text-center md:text-left">
+            <h1 className="text-3xl font-bold text-gray-800">
+              {userData?.name || "Bilgi Yok"} {userData?.surname || "Bilgi Yok"}
+            </h1>
           </div>
-        </div>
-
-        <div className="flex flex-row bg-slate-500 rounded-xl shadow-2xl my-7 h-56 w-full md:w-[40%] text-xl items-center justify-center">
-          <div className="flex flex-col gap-4 p-7 font-extrabold">
-            <p>Telefon :</p>
-            <p>il :</p>
-            <p>ilçe :</p>
-            <p>Mevki :</p>
-          </div>
-          <div className="flex flex-col gap-4 p-7">
-            <p>{userData?.phone || "Bilgi Yok"}</p>
-            <p>{userData?.city || "Bilgi Yok"}</p>
-            <p>{userData?.position || "Bilgi Yok"}</p>
-            <p>{teamData ? teamData.name : "Takım Yok"}</p>
-          </div>
-        </div>
-
-
-        <Sheet>
-          <SheetTrigger asChild className="flex w-full justify-center">
-            <div>
-              <Button
-                className="flex md:w-[40%] w-full bg-lime-400 border-none rounded-xl hover:bg-slate-400 "
-                variant="outline"
-                onClick={() => {
-                  // Formu userData ile doldur
-                  setFormData({
-                    name: userData?.name || "",
-                    surname: userData?.surname || "",
-                    phone: userData?.phone || "",
-                    city: userData?.city || "",
-                    district: userData?.district || "",
-                    position: userData?.position || "",
-                  });
-
-                  // Eğer şehir seçilmişse ilçeleri güncelle
-                  if (userData?.city) {
-                    const selectedCity = cityData.find(
-                      (city) => capitalizeWords(city.name) === userData.city
-                    );
-                    setDistricts(
-                      selectedCity ? selectedCity.counties.map(capitalizeWords) : []
-                    );
-                  }
-                }}
-              >
-                Düzenle
-              </Button>
-            </div>
-
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Profili Düzenle</SheetTitle>
-              <SheetDescription>
-                Diğer kullanıcıların bilmesini istediği bilgileri giriniz.
-              </SheetDescription>
-            </SheetHeader>
-            <form>
-              <div>
-                <Label>Ad:</Label>
-                <Input
-                  type="text"
-                  placeholder="Adınız"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Soyad:</Label>
-                <Input
-                  type="text"
-                  placeholder="Soyadınız"
-                  value={formData.surname}
-                  onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Telefon:</Label>
-                <Input
-                  type="text"
-                  placeholder="Telefon Numaranız"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Şehir:</Label>
-                <Select
-                  onValueChange={(value) => {
-                    setFormData({ ...formData, city: value, district: "" });
-
-                    // İlçe listesini güncelle
-                    const selectedCity = cityData.find(
-                      (city) => capitalizeWords(city.name) === value
-                    );
-                    setDistricts(
-                      selectedCity ? selectedCity.counties.map(capitalizeWords) : []
-                    );
-                  }}
-                >
-                  <SelectTrigger className="w-full max-w-xs bg-green-300 rounded-xl">
-                    <SelectValue placeholder={formData.city || "Şehir Seç"} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-green-300 rounded-xl">
-                    <SelectGroup>
-                      <SelectLabel>Şehirler</SelectLabel>
-                      {cityData.map((city) => (
-                        <SelectItem key={city.name} value={capitalizeWords(city.name)}>
-                          {capitalizeWords(city.name)}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>İlçe:</Label>
-                <Select
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, district: value })
-                  }
-                  disabled={!formData.city} // Şehir seçilmeden ilçe seçilemesin
-                >
-                  <SelectTrigger className="w-full max-w-xs mt-4 bg-green-300 rounded-xl">
-                    <SelectValue placeholder={formData.district || "İlçe Seç"} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-green-300 rounded-xl">
-                    <SelectGroup>
-                      <SelectLabel>İlçeler</SelectLabel>
-                      {districts.map((district, index) => (
-                        <SelectItem key={index} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Mevki:</Label>
-                <Input
-                  type="text"
-                  placeholder="Mevkiniz"
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                />
-              </div>
-            </form>
-            <SheetFooter>
-              <SheetClose asChild>
-                <Button type="submit" onClick={handleSave}>
-                  Kaydet
-                </Button>
-              </SheetClose>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-
-        <div>
-          <ul>
-            {friendRequests.map((request) => (
-              <div key={request.id} className="py-10">
-                <h3 className="font-semibold font-poppinsSemiBold ">Bekleyen Arkadaşlık İstekleri</h3>
-                <li className="flex items-center justify-between">
-                  <span className="font-poppinsLight">
-                    {request.senderName} {request.senderSurname} size arkadaşlık isteği gönderdi.
-                  </span>
-                  <div className="flex flex-row gap-2">
-                    <Button className="bg-green-600 w-10 h-10 rounded-full text-2xl"
-                      onClick={() => handleFriendRequestResponse(request.id, "accepted")}
-                    >
-                      ✓
-                    </Button>
-                    <Button className="bg-red-600 w-10 h-10 rounded-full text-2xl"
-                      onClick={() => handleFriendRequestResponse(request.id, "rejected")}
-                    >
-                      X
-                    </Button>
-                  </div>
-                </li>
-              </div>
-            ))}
-          </ul>
         </div>
       </div>
+
+      {/* Kullanıcı Bilgileri */}
+      <div className="w-full max-w-4xl bg-white  rounded-lg mt-6 p-6">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Bilgiler</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-gray-600 font-medium">Telefon:</p>
+            <p className="text-gray-800">{userData?.phone || "Bilgi Yok"}</p>
+          </div>
+          <div>
+            <p className="text-gray-600 font-medium">İl:</p>
+            <p className="text-gray-800">{userData?.city || "Bilgi Yok"}</p>
+          </div>
+          <div>
+            <p className="text-gray-600 font-medium">İlçe:</p>
+            <p className="text-gray-800">{userData?.district || "Bilgi Yok"}</p>
+          </div>
+          <div>
+            <p className="text-gray-600 font-medium">Mevki:</p>
+            <p className="text-gray-800">{userData?.position || "Bilgi Yok"}</p>
+          </div>
+        </div>
+      </div>
+
+
+
+      <Sheet>
+        <SheetTrigger asChild className="flex w-full justify-center">
+          <div>
+            <Button
+              className="flex md:w-[40%] w-full bg-button border-none rounded-xl hover:bg-foreground hover:text-slate-700"
+              variant="outline"
+              onClick={() => {
+                // Formu userData ile doldur
+                setFormData({
+                  name: userData?.name || "",
+                  surname: userData?.surname || "",
+                  phone: userData?.phone || "",
+                  city: userData?.city || "",
+                  district: userData?.district || "",
+                  position: userData?.position || "",
+                });
+
+                // Eğer şehir seçilmişse ilçeleri güncelle
+                if (userData?.city) {
+                  const selectedCity = cityData.find(
+                    (city) => capitalizeWords(city.name) === userData.city
+                  );
+                  setDistricts(
+                    selectedCity ? selectedCity.counties.map(capitalizeWords) : []
+                  );
+                }
+              }}
+            >
+              Düzenle
+            </Button>
+          </div>
+
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Profili Düzenle</SheetTitle>
+            <SheetDescription>
+              Diğer kullanıcıların bilmesini istediği bilgileri giriniz.
+            </SheetDescription>
+          </SheetHeader>
+          <form>
+            <div>
+              <Label>Ad:</Label>
+              <Input
+                type="text"
+                placeholder="Adınız"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Soyad:</Label>
+              <Input
+                type="text"
+                placeholder="Soyadınız"
+                value={formData.surname}
+                onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Telefon:</Label>
+              <Input
+                type="text"
+                placeholder="Telefon Numaranız"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Şehir:</Label>
+              <Select
+                onValueChange={(value) => {
+                  setFormData({ ...formData, city: value, district: "" });
+
+                  // İlçe listesini güncelle
+                  const selectedCity = cityData.find(
+                    (city) => capitalizeWords(city.name) === value
+                  );
+                  setDistricts(
+                    selectedCity ? selectedCity.counties.map(capitalizeWords) : []
+                  );
+                }}
+              >
+                <SelectTrigger className="w-full max-w-xs bg-foreground rounded-xl">
+                  <SelectValue placeholder={formData.city || "Şehir Seç"} />
+                </SelectTrigger>
+                <SelectContent className="bg-foreground rounded-xl">
+                  <SelectGroup>
+                    <SelectLabel>Şehirler</SelectLabel>
+                    {cityData.map((city) => (
+                      <SelectItem key={city.name} value={capitalizeWords(city.name)}>
+                        {capitalizeWords(city.name)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>İlçe:</Label>
+              <Select
+                onValueChange={(value) =>
+                  setFormData({ ...formData, district: value })
+                }
+                disabled={!formData.city} // Şehir seçilmeden ilçe seçilemesin
+              >
+                <SelectTrigger className="w-full max-w-xs mt-4 bg-foreground rounded-xl">
+                  <SelectValue placeholder={formData.district || "İlçe Seç"} />
+                </SelectTrigger>
+                <SelectContent className="bg-foreground rounded-xl">
+                  <SelectGroup>
+                    <SelectLabel>İlçeler</SelectLabel>
+                    {districts.map((district, index) => (
+                      <SelectItem key={index} value={district}>
+                        {district}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Mevki:</label>
+              <Select
+                onValueChange={(value) =>
+                  setFormData({ ...formData, position: value })
+                }
+              >
+                <SelectTrigger className="w-full max-w-xs bg-foreground rounded-xl">
+                  <SelectValue placeholder="Mevkinizi Seçin" />
+                </SelectTrigger>
+                <SelectContent className="bg-foreground rounded-xl">
+                  <SelectGroup>
+                    <SelectLabel>Mevkiler</SelectLabel>
+                    <SelectItem value="Kaleci">Kaleci</SelectItem>
+                    <SelectItem value="Defans">Defans</SelectItem>
+                    <SelectItem value="Orta Saha">Orta Saha</SelectItem>
+                    <SelectItem value="Forvet">Forvet</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </form>
+          <SheetFooter>
+            <SheetClose asChild className="flex items-center justify-center my-6">
+              <Button type="submit" onClick={handleSave} className="rounded-xl bg-button hover:bg-foreground hover:text-slate-700">
+                Kaydet
+              </Button>
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
     </div>
   );
 }

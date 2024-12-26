@@ -329,7 +329,8 @@ export default function MyTeam() {
 
           {members.length > 0 && (
             <div>
-              <h2 className="text-lg font-bold">Takımım</h2>
+              <h2 className="text-lg font-bold items-center justify-center flex">Oyuncular</h2>
+              <div className="h-0.5 w-full bg-slate-500 my-5"></div>
               <div className="flex flex-wrap">
                 <ul className="flex w-full flex-wrap gap-4">
                   {members

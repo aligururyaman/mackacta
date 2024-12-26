@@ -159,7 +159,7 @@ const FindPlayer = () => {
 
 
   return (
-    <div className="flex flex-col ">
+    <div className="flex md:flex-row flex-col md:gap-10">
       <div className="flex flex-col w-96">
         <div className="flex flex-col gap-3">
           <h3>Şehir ve İlçe ile Ara</h3>
@@ -233,7 +233,7 @@ const FindPlayer = () => {
       <div className="flex flex-col w-96">
         <ul className="flex flex-col gap-4 ">
           {users.map((user, index) => (
-            <div key={user.id} className="p-4 flex flex-col md:flex-row  hover:bg-neutral-400 dark:hover:bg-neutral-800 rounded-xl">
+            <div key={user.id} className="p-4 w-80 flex flex-col md:flex-row  hover:bg-button dark:hover:bg-neutral-800 rounded-xl">
               <motion.div
                 layoutId={`card-${user.name}-${id}`}
                 key={`card-${user.name}-${id}`}

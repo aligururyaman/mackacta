@@ -286,30 +286,27 @@ export default function MyTeam() {
           </Sheet>
         </div>
       ) : (
-        <div className="flex flex-col gap-10">
-          <div className="flex items-center justify-center ">
-
-            <div className="p-4 flex flex-col items-center justify-center bg-foreground text-slate-800 sm:w-96 rounded-xl  shadow-xl relative ">
-
-              <div className="flex flex-col justify-center items-center">
-                <img
-                  src={teamData.teamImage}
-                  alt="Takım Resmi"
-                  className="w-32 h-32 rounded-full object-cover  shadow-xl "
-                />
-                <div className="flex flex-col items-center">
-                  <p className="text-4xl font-black">{teamData.name}</p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <p className="text-lg font-light">{teamData.city}</p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <p className="text-lg font-light">{teamData.district}</p>
+        <div className="flex  flex-col gap-10">
+          <div className="flex justify-center py-8 bg-background">
+            <div className="flex flex-col md:flex-row items-center justify-between bg-gradient-to-tr from-button to-foreground p-6 rounded-2xl shadow-lg w-full ">
+              <img
+                src={teamData.teamImage}
+                alt="Takım Resmi"
+                className="w-40 h-40 rounded-full border-4 border-white shadow-lg object-cover"
+              />
+              <div className="text-center md:text-left mt-4 md:mt-0 md:ml-6">
+                <p className="text-3xl font-extrabold">{teamData.name}</p>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center gap-1">
+                    <p className="text-lg">{teamData.city}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <p className="text-lg">{teamData.district}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
 
           {members.length > 0 && (
             <div>
@@ -357,7 +354,6 @@ export default function MyTeam() {
                       </div>
                     ))}
                 </ul>
-
                 <AnimatePresence>
                   {selectedMember && (
                     <motion.div

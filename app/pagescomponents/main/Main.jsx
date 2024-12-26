@@ -5,9 +5,9 @@ import Image from "next/image";
 
 export default function Main() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-100 to-foreground text-slate-700 rounded-xl">
+    <div className="min-h-screen  text-slate-700 rounded-xl">
       {/* Hero Section */}
-      <div className="flex flex-col justify-center items-center py-12 px-4">
+      <div className="flex flex-col justify-center items-center py-8 px-4">
         <Image
           src={logo}
           width={150}
@@ -23,70 +23,97 @@ export default function Main() {
         </p>
       </div>
 
-      {/* Features Section */}
-      <div className="py-12 px-6 bg-foreground text-gray-800 rounded-t-3xl shadow-2xl">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          Uygulamamızda Neler Var?
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex flex-col items-center text-center p-4 bg-gray-100 rounded-lg shadow-md hover:bg-blue-50 transition">
-            <div className="p-4 bg-blue-500 text-white rounded-full mb-4">
-              🏟️
+      <div className="w-full">
+        <div className="flex flex-col md:flex-row">
+          {/* 1. Görsel */}
+          <div className="relative w-full md:w-1/3 h-96">
+            <Image
+              src="https://images.unsplash.com/photo-1689915563407-4b2986d4e05e?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Takım Arkadaşı Bul"
+              fill
+              className="object-cover rounded-2xl"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-2xl">
+              <h2 className="text-white text-2xl md:text-4xl font-bold">
+                Takım Arkadaşı Bul
+              </h2>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Maç Organizasyonu</h3>
-            <p className="text-gray-600">
-              Halı saha maçlarınızı düzenleyin ve katılımcılarınızı yönetin.
-            </p>
           </div>
-          <div className="flex flex-col items-center text-center p-4 bg-gray-100 rounded-lg shadow-md hover:bg-blue-50 transition">
-            <div className="p-4 bg-green-500 text-white rounded-full mb-4">
-              🧑‍🤝‍🧑
+
+          {/* 2. Görsel */}
+          <div className="relative w-full md:w-1/3 h-96 mt-4 md:mt-0 md:ml-4">
+            <Image
+              src="https://images.unsplash.com/photo-1574676581439-89ee9f0a7bf1?q=80&w=1854&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Rakip Bul"
+              fill
+              className="object-cover rounded-2xl"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-2xl">
+              <h2 className="text-white text-2xl md:text-4xl font-bold">
+                Rakip Bul
+              </h2>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Takım Arkadaşı Bul</h3>
-            <p className="text-gray-600">
-              Yeni takım arkadaşları keşfedin ve takımlarınızı güçlendirin.
-            </p>
           </div>
-          <div className="flex flex-col items-center text-center p-4 bg-gray-100 rounded-lg shadow-md hover:bg-blue-50 transition">
-            <div className="p-4 bg-yellow-500 text-white rounded-full mb-4">
-              📅
+
+          {/* 3. Görsel */}
+          <div className="relative w-full md:w-1/3 h-96 mt-4 md:mt-0 md:ml-4 ">
+            <Image
+              src="https://images.unsplash.com/photo-1627990282816-21d33cb33136?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Şehrin En İyisi Ol"
+              fill
+              className="object-cover rounded-2xl"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-2xl">
+              <h2 className="text-white text-2xl md:text-4xl font-bold">
+                Şehrin En İyisi Ol
+              </h2>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Maç Takvimi</h3>
-            <p className="text-gray-600">
-              Maç tarihlerini kolayca yönetin ve tüm katılımcılarla paylaşın.
-            </p>
           </div>
         </div>
       </div>
 
+
+
       {/* Call to Action */}
-      <div className="py-12 px-6 bg-gradient-to-b from-foreground to-green-900 text-white text-center">
-        <h2 className="text-3xl font-bold mb-4">
-          Halı Saha Keyfini Hemen Başlatın!
-        </h2>
+      <div className="py-16 px-6 text-center text-slate-800">
+        <h2 className="text-4xl font-extrabold mb-4">Halı Saha Keyfine Başla!</h2>
+        <p className="text-lg max-w-2xl mx-auto text-slate-600">
+          Takım arkadaşlarını bul, rakiplerini seç ve unutulmaz maçlara başla.
+        </p>
       </div>
 
       {/* Footer */}
-      <footer className="bg-green-900 text-white py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-end items-center">
+      <footer className="border-t border-gray-300 py-8 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          {/* Footer Left */}
+          <div>
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Maç Kaçta</h3>
+            <p className="text-sm text-slate-600">
+              Türkiye’nin en iyi halı saha organizasyon platformu.
+            </p>
+          </div>
 
           {/* Footer Right */}
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-6">
             <a
               href="#"
-              className="bg-gray-700 p-2 rounded-full hover:bg-red-500 transition"
+              className="bg-gray-200 p-3 rounded-full hover:bg-gray-300 transition flex items-center justify-center"
             >
-              <Instagram />
+              <Instagram size={20} className="text-slate-800" />
             </a>
             <a
               href="#"
-              className="bg-gray-700 p-2 rounded-full hover:bg-blue-400 transition"
+              className="bg-gray-200 p-3 rounded-full hover:bg-gray-300 transition flex items-center justify-center"
             >
-              <Twitter />
+              <Twitter size={20} className="text-slate-800" />
             </a>
           </div>
         </div>
+        <div className="mt-6 text-center text-sm text-slate-600">
+          © 2024 Maç Kaçta. Tüm Hakları Saklıdır.
+        </div>
       </footer>
+
     </div>
   );
 }

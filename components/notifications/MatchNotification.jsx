@@ -230,10 +230,10 @@ function MatchNotification({ show, onClose }) {
                   sizi arkadaş olarak ekledi.
                 </span>
                 <div className="flex flex-row gap-4">
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "friend", "accept")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "friend", "accept")}>
                     Kabul Et
                   </Button>
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "friend", "reject")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "friend", "reject")}>
                     Reddet
                   </Button>
                 </div>
@@ -249,10 +249,10 @@ function MatchNotification({ show, onClose }) {
                   <strong>{request.senderTeamName || "Bilinmiyor"}</strong> sizinle maç yapmak istiyor.
                 </span>
                 <div className="flex flex-row gap-4">
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "match", "accept")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "match", "accept")}>
                     Kabul Et
                   </Button>
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "match", "reject")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "match", "reject")}>
                     Reddet
                   </Button>
                 </div>
@@ -268,7 +268,7 @@ function MatchNotification({ show, onClose }) {
               </span>
               <div className="flex flex-row gap-4">
                 <Button
-                  className="rounded-xl bg-button hover:bg-background hover:text-white"
+                  className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600"
                   onClick={() =>
                     handleRequestAction(request.id, "team", "accept", {
                       senderId: request.senderId,
@@ -278,7 +278,7 @@ function MatchNotification({ show, onClose }) {
                 >
                   Kabul Et
                 </Button>
-                <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={() => handleRequestAction(request.id, "team", "reject")}>
+                <Button className="rounded-xl bg-button hover:bg-background hover:text-slate-600" onClick={() => handleRequestAction(request.id, "team", "reject")}>
                   Reddet
                 </Button>
 

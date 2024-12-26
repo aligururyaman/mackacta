@@ -109,7 +109,7 @@ export default function Home() {
                   placeholder="@xxx.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-xl border-none bg-button"
+                  className="rounded-xl border-none bg-textbox"
                 />
               </div>
               <div className="space-y-1">
@@ -120,12 +120,12 @@ export default function Home() {
                   placeholder="Şifre"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="rounded-xl border-none bg-button"
+                  className="rounded-xl border-none bg-textbox"
                 />
               </div>
             </CardContent>
             <CardFooter className="flex justify-center">
-              <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={handleSignIn}>Giriş Yap</Button>
+              <Button className="rounded-xl bg-button hover:bg-background hover:text-slate-700" onClick={handleSignIn}>Giriş Yap</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -143,7 +143,7 @@ export default function Home() {
                   placeholder="İsim"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="rounded-xl border-none bg-button"
+                  className="rounded-xl border-none bg-textbox"
                 />
               </div>
 
@@ -154,7 +154,7 @@ export default function Home() {
                   placeholder="Soyad"
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
-                  className="rounded-xl border-none bg-button"
+                  className="rounded-xl border-none bg-textbox"
                 />
               </div>
 
@@ -165,7 +165,7 @@ export default function Home() {
                   placeholder="@xxx.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-xl border-none bg-button"
+                  className="rounded-xl border-none bg-textbox"
                 />
               </div>
               <div className="space-y-1">
@@ -175,12 +175,12 @@ export default function Home() {
                   placeholder="Şifre"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="rounded-xl border-none bg-button"
+                  className="rounded-xl border-none bg-textbox"
                 />
               </div>
             </CardContent>
             <CardFooter className="flex justify-center">
-              <Button className="rounded-xl bg-button hover:bg-background hover:text-white" onClick={handleSignUp}>Kayıt Ol</Button>
+              <Button className="rounded-xl bg-button hover:bg-background hover:text-slate-700" onClick={handleSignUp}>Kayıt Ol</Button>
             </CardFooter>
           </Card>
         </TabsContent>

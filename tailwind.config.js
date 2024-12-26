@@ -14,9 +14,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#D3F1DF",
-        foreground: "#5DB996",
-        button: "#D3F1DF",
+        background: "#F8FAFC",
+        foreground: "#F4F6FF",
+        button: "#EFECEC",
+        textbox: "#F5F5F5",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
+import Image from "next/image";
 
 const capitalizeWords = (str) => {
   if (!str) return "";
@@ -287,14 +288,30 @@ export default function MyTeam() {
         </div>
       ) : (
         <div className="flex  flex-col gap-10">
-          <div className="flex justify-center py-8 bg-background">
-            <div className="flex flex-col md:flex-row items-center justify-between bg-gradient-to-tr from-button to-foreground p-6 rounded-2xl shadow-lg w-full ">
+
+          <div className="relative flex justify-center py-8">
+            {/* Background Image */}
+            <div className="absolute inset-0 z-0">
+              <Image
+                src="https://images.unsplash.com/photo-1604513896387-78c36ee80657?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="Background"
+                layout="fill"
+                objectFit="cover"
+                className="rounded-xl"
+                priority
+              />
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-30 rounded-xl"></div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between  p-6 rounded-2xl shadow-lg w-full max-w-5xl">
               <img
                 src={teamData.teamImage}
                 alt="Takım Resmi"
-                className="w-40 h-40 rounded-full border-4 border-white shadow-lg object-cover"
+                className="w-40 h-40 rounded-full object-cover"
               />
-              <div className="text-center md:text-left mt-4 md:mt-0 md:ml-6">
+              <div className="text-center md:text-left mt-4 md:mt-0 md:ml-6 text-slate-200 ">
                 <p className="text-3xl font-extrabold">{teamData.name}</p>
                 <div className="flex items-center gap-4 mt-2">
                   <div className="flex items-center gap-1">
@@ -307,6 +324,8 @@ export default function MyTeam() {
               </div>
             </div>
           </div>
+
+
 
           {members.length > 0 && (
             <div>

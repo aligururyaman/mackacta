@@ -254,7 +254,7 @@ export default function Dashboard() {
             </p>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 bg-background relative">
+        <div className="p-3">
           <div className="relative z-10">
             {renderContent()}
           </div>

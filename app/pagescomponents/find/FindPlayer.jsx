@@ -159,7 +159,7 @@ const FindPlayer = () => {
 
 
   return (
-    <div className="flex md:flex-row flex-col md:gap-10">
+    <div className="flex flex-col gap-6 md:gap-10">
       <div className="flex flex-col w-96">
         <div className="flex flex-col gap-3">
           <h3>Şehir ve İlçe ile Ara</h3>
@@ -229,16 +229,16 @@ const FindPlayer = () => {
           </div>
         </div>
       </div>
-
-      <div className="flex flex-col w-96">
+      <p className="flex  font-extrabold text-lg">Arama Sonuçları</p>
+      <div className="flex">
         <ul className="flex flex-col gap-4 ">
           {users.map((user, index) => (
-            <div key={user.id} className="p-4 w-80 flex flex-col md:flex-row  hover:bg-button dark:hover:bg-neutral-800 rounded-xl">
+            <div key={user.id} className="p-4 flex flex-col md:flex-row  hover:bg-neutral-400 dark:hover:bg-neutral-800 rounded-xl">
               <motion.div
                 layoutId={`card-${user.name}-${id}`}
                 key={`card-${user.name}-${id}`}
                 onClick={() => setActive(user)}
-                className="flex w-96 cursor-pointer"
+                className="flex w-40 md:w-96 cursor-pointer"
               >
                 <div className="flex gap-4 flex-row  ">
                   <motion.div layoutId={`image-${user.name}-${id}`}>
@@ -282,7 +282,7 @@ const FindPlayer = () => {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="bg-white dark:bg-neutral-800 p-6 rounded-lg w-96 flex flex-col items-center gap-1"
+              className="bg-white dark:bg-neutral-800 p-6 rounded-lg w-80 md:96 flex flex-col items-center gap-1"
             >
               <img
                 className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
@@ -316,11 +316,3 @@ const FindPlayer = () => {
 };
 
 export default FindPlayer;
-
-
-
-
-
-
-
-

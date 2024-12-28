@@ -58,14 +58,23 @@ const FindPlayer = () => {
   }, [searchCity]);
 
   // Search users by city and district
+  // Search users by city and district
   const handleCityDistrictSearch = async () => {
     try {
       const usersRef = collection(db, "users");
-      const q = query(
-        usersRef,
-        where("city", "==", searchCity),
-        where("district", "==", searchDistrict)
-      );
+      let q;
+
+      if (searchDistrict) {
+        // Eğer ilçe seçiliyse, şehir ve ilçeye göre filtrele
+        q = query(
+          usersRef,
+          where("city", "==", searchCity),
+          where("district", "==", searchDistrict)
+        );
+      } else {
+        // Eğer ilçe seçili değilse, sadece şehre göre filtrele
+        q = query(usersRef, where("city", "==", searchCity));
+      }
 
       const querySnapshot = await getDocs(q);
       const userList = querySnapshot.docs.map((doc) => ({
@@ -74,10 +83,12 @@ const FindPlayer = () => {
       }));
 
       setUsers(userList);
+      setFilteredUsers(userList); // Varsayılan olarak filtrelenmemiş kullanıcılar
     } catch (error) {
       console.error("Error:", error);
     }
   };
+
 
   // Search users by name and surname
   const handleNameSearch = async () => {

@@ -28,7 +28,7 @@ import { auth, db } from "@/utils/firebase";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import MatchNotification from "@/components/notifications/MatchNotification";
 
 export default function Dashboard() {
@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [friendRequests, setFriendRequests] = useState([]);
   const [matchRequests, setMatchRequests] = useState([]);
   const [teamRequests, setTeamRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [teamData, setTeamData] = useState(null); // Takım verisi
   const router = useRouter();
@@ -173,6 +174,22 @@ export default function Dashboard() {
     setShowNotifications((prev) => !prev); // Bildirim panelini aç/kapat
   };
 
+
+
+  useEffect(() => {
+    const savedSelectedItem = localStorage.getItem("selectedItem");
+    const savedSelectedSubItem = localStorage.getItem("selectedSubItem");
+
+    if (savedSelectedItem) setSelectedItem(savedSelectedItem);
+    if (savedSelectedSubItem) setSelectedSubItem(savedSelectedSubItem);
+  }, []);
+
+  // Seçimler değiştiğinde bu seçimleri sakla
+  useEffect(() => {
+    localStorage.setItem("selectedItem", selectedItem);
+    localStorage.setItem("selectedSubItem", selectedSubItem);
+  }, [selectedItem, selectedSubItem]);
+
   const handleMenuSelect = (subItemTitle, mainItemTitle) => {
     setSelectedItem(mainItemTitle);
     setSelectedSubItem(subItemTitle);
@@ -180,6 +197,7 @@ export default function Dashboard() {
 
   // Dinamik bileşen seçimi
   const renderContent = () => {
+
     if (selectedSubItem === "Takımım") {
       return <MyTeam />;
     }
@@ -203,6 +221,21 @@ export default function Dashboard() {
     }
     if (selectedSubItem === "Arkadaşlar") {
       return <Friends />;
+    }
+    if (isLoading) {
+      return <div className="flex items-center justify-center min-h-screen bg-background">
+        <motion.div
+          animate={{
+            rotate: 360,
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 1,
+            ease: "linear",
+          }}
+          className="w-16 h-16 border-4 border-slate-700 border-t-transparent rounded-full"
+        ></motion.div>
+      </div>
     }
 
     return <div><Main /></div>;

@@ -39,7 +39,7 @@ const AsyncDataPhone = ({ captainId }) => {
 
   return (
     <span>
-      {captainInfo.phone}
+      {captainInfo.name}
     </span>
   );
 };

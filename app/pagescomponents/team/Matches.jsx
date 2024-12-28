@@ -10,12 +10,15 @@ import {
   getDoc,
 } from "firebase/firestore";
 import ScheduledMatches from "@/components/matchesComp/ScheduledMatches";
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 const Matches = () => {
   const [userId, setUserId] = useState(null);
   const [teamData, setTeamData] = useState(null);
   const [pastMatches, setPastMatches] = useState([]);
   const [futureMatches, setFutureMatches] = useState([]);
+  const [isListVisibleFuture, setIsListVisibleFuture] = useState(true);
+  const [isListVisiblePast, setIsListVisiblePast] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -115,18 +118,57 @@ const Matches = () => {
     fetchMatches();
   }, [teamData]);
 
+  const togglePastListVisibility = () => {
+    setIsListVisiblePast((prev) => !prev);
+  };
+
+  const toggleFutureListVisibility = () => {
+    setIsListVisibleFuture((prev) => !prev);
+  };
+
   return (
-    <div className="flex flex-col p-2">
+    <div className="flex flex-col gap-4 p-2">
       <h2 className="text-4xl font-bold">Maçlar</h2>
 
-      <div className="">
-        <h3 className="text-2xl font-semibold mb-4">Gelecek Maçlar</h3>
-        <ScheduledMatches matches={futureMatches} ownTeamId={teamData?.id} />
-      </div>
+      <div className="bg-foreground p-4 rounded-lg shadow-lg border border-gray-200">
+        <div
+          className="flex items-center justify-between cursor-pointer"
+          onClick={toggleFutureListVisibility}
+        >
+          <h3 className="text-2xl font-semibold">Gelecek Maçlar</h3>
+          {isListVisibleFuture ? (
+            <ChevronUpIcon className="w-6 h-6 text-gray-600" />
+          ) : (
+            <ChevronDownIcon className="w-6 h-6 text-gray-600" />
+          )}
+        </div>
 
-      <div>
-        <h3 className="text-2xl font-semibold mb-4">Geçmiş Maçlar</h3>
-        <ScheduledMatches matches={pastMatches} ownTeamId={teamData?.id} />
+        {/* Liste görünürlüğü kontrolü */}
+        {isListVisibleFuture && (
+          <div className="mt-4">
+            <ScheduledMatches matches={futureMatches} ownTeamId={teamData?.id} />
+          </div>
+        )}
+      </div>
+      <div className="bg-foreground p-4 rounded-lg shadow-lg border border-gray-200">
+        <div
+          className="flex items-center justify-between cursor-pointer"
+          onClick={togglePastListVisibility}
+        >
+          <h3 className="text-2xl font-semibold">Geçmiş Maçlar</h3>
+          {isListVisiblePast ? (
+            <ChevronUpIcon className="w-6 h-6 text-gray-600" />
+          ) : (
+            <ChevronDownIcon className="w-6 h-6 text-gray-600" />
+          )}
+        </div>
+
+        {/* Liste görünürlüğü kontrolü */}
+        {isListVisiblePast && (
+          <div className="mt-4">
+            <ScheduledMatches matches={pastMatches} ownTeamId={teamData?.id} />
+          </div>
+        )}
       </div>
     </div>
   );

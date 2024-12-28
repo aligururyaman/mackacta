@@ -1,38 +1,58 @@
 'use client';
 import AsyncTeamDataFetcher from "@/components/AsyncTeamDataFetcher";
+import { Button } from "../ui/button";
 
 const ScheduledMatches = ({ matches, ownTeamId }) => {
   if (!matches || matches.length === 0) {
-    return <p></p>;
+    return (
+      <p className="text-center text-gray-500 text-lg font-medium mt-10">
+        Henüz planlanmış maç yok.
+      </p>
+    );
   }
 
   return (
-    <div className="flex flex-wrap p-2 justify-center md:justify-normal gap-4">
+    <div className="flex flex-wrap p-6 justify-center md:justify-start gap-8 bg-foreground">
       {matches.map((match) => {
         const opponentTeamId =
           match.senderTeamId === ownTeamId ? match.receiverTeamId : match.senderTeamId;
 
         return (
-          <div key={match.id}>
-            <div className="flex flex-col justify-center items-center bg-slate-500 rounded-xl p-4 gap-3 shadow-xl border border-slate-700 w-80">
-              <div className="flex flex-row">
-                <AsyncTeamDataFetcher teamId={opponentTeamId} />
+          <div
+            key={match.id}
+            className="bg-foreground rounded-lg shadow-lg border border-gray-200 w-full max-w-sm p-6 hover:shadow-xl transition-shadow"
+          >
+            <div className="flex flex-col items-center gap-6">
+              <AsyncTeamDataFetcher teamId={opponentTeamId} />
+
+              <div className="w-full border-t border-gray-300"></div>
+
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-800 mb-1">Saha</h3>
+                <p className="text-sm text-gray-600">{match.field || "Bilinmiyor"}</p>
               </div>
-              <div className="flex flex-col justify-center items-center text-sm font-semibold gap-2">
-                <div className="flex flex-col justify-center items-center text-green-200 p-2 rounded-xl">
-                  <p className="text-lime-600">Saha :</p>
-                  {match.field}
-                </div>
-                <div className="flex flex-col justify-center items-center p-3 text-green-200 rounded-xl">
-                  <p className="text-lime-600">Zaman :</p>
-                  <div>
-                    {match.date?.toDate().toLocaleDateString()}
-                  </div>
-                  <div className="flex">
-                    {match.time}
-                  </div>
-                </div>
+
+              <div className="w-full border-t border-gray-300"></div>
+
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-800 mb-1">Zaman</h3>
+                <p className="text-sm text-gray-600">
+                  {match.date
+                    ? `${match.date.toDate().toLocaleDateString("tr-TR", {
+                      day: "2-digit",
+                      month: "long",
+                    })} ${match.date.toDate().toLocaleDateString("tr-TR", { weekday: "long" })}`
+                    : "Tarih Yok"}
+                </p>
+                <p className="text-sm text-gray-600">{match.time || "Saat Yok"}</p>
               </div>
+
+
+              <div className="w-full border-t border-gray-300"></div>
+
+              <Button variant="outline" className="rounded-xl bg-button hover:bg-background hover:text-slate-700 border-none" >
+                Detay
+              </Button>
             </div>
           </div>
         );

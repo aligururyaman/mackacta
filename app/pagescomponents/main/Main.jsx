@@ -13,6 +13,7 @@ export default function Main() {
           width={150}
           height={150}
           alt="logo"
+          priority
           className="rounded-full shadow-lg"
         />
         <h1 className="font-extrabold text-4xl md:text-6xl mt-6 text-center">
@@ -32,6 +33,7 @@ export default function Main() {
               alt="Takım Arkadaşı Bul"
               fill
               className="object-cover rounded-2xl"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-2xl">
               <h2 className="text-white text-2xl md:text-4xl font-bold">
@@ -47,6 +49,7 @@ export default function Main() {
               alt="Rakip Bul"
               fill
               className="object-cover rounded-2xl"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-2xl">
               <h2 className="text-white text-2xl md:text-4xl font-bold">
@@ -62,6 +65,7 @@ export default function Main() {
               alt="Şehrin En İyisi Ol"
               fill
               className="object-cover rounded-2xl"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-2xl">
               <h2 className="text-white text-2xl md:text-4xl font-bold">

@@ -419,7 +419,7 @@ export default function UserInfo() {
                     <SelectLabel>Mevkiler</SelectLabel>
                     <SelectItem value="Kaleci">Kaleci</SelectItem>
                     <SelectItem value="Defans">Defans</SelectItem>
-                    <SelectItem value="Orta Saha">Orta Saha</SelectItem>
+                    <SelectItem value="Orta Saha">Ortasaha</SelectItem>
                     <SelectItem value="Forvet">Forvet</SelectItem>
                   </SelectGroup>
                 </SelectContent>

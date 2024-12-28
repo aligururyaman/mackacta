@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { auth } from "@/utils/firebase";
 import { AnimatePresence, motion } from "framer-motion";
 import { useOutsideClick } from "@/hooks/use-outside-click";
-import { Search } from "lucide-react";
+import { Filter, Search } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 
@@ -34,8 +35,10 @@ const FindPlayer = () => {
   const [searchName, setSearchName] = useState("");
   const [searchSurname, setSearchSurname] = useState("");
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [active, setActive] = useState(null);
+  const [selectedPositions, setSelectedPositions] = useState([]);
   const ref = useRef(null);
   const id = useId();
 
@@ -156,7 +159,26 @@ const FindPlayer = () => {
 
   useOutsideClick(ref, () => setActive(null));
 
+  const applyPositionFilter = () => {
+    if (selectedPositions.length > 0) {
+      const filtered = users.filter((user) =>
+        selectedPositions.includes(user.position)
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
+    }
+  };
 
+  const togglePosition = (position) => {
+    setSelectedPositions((prev) => {
+      if (prev.includes(position)) {
+        return prev.filter((p) => p !== position);
+      } else {
+        return [...prev, position];
+      }
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6 md:gap-10">
@@ -227,12 +249,42 @@ const FindPlayer = () => {
           <div className="mt-5">
 
           </div>
+          <div className="flex flex-col gap-3">
+            <p>Filtre</p>
+            <div className="flex flex-col gap-4">
+              <div className="flex md:flex-row flex-col gap-2">
+                {[
+                  "Kaleci",
+                  "Defans",
+                  "Orta Saha",
+                  "Forvet",
+                ].map((position) => (
+                  <div key={position} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={position}
+                      checked={selectedPositions.includes(position)}
+                      onCheckedChange={() => togglePosition(position)}
+                    />
+                    <label htmlFor={position} className="text-sm font-medium">
+                      {position}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <Button
+                onClick={applyPositionFilter}
+                variant="outline" size="icon" className="rounded-xl bg-button"
+              >
+                <Filter size={20} />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
       <p className="flex  font-extrabold text-lg">Arama Sonuçları</p>
       <div className="flex">
         <ul className="flex flex-col gap-4 ">
-          {users.map((user, index) => (
+          {filteredUsers.map((user, index) => (
             <div key={user.id} className="p-4 flex flex-col md:flex-row  hover:bg-neutral-400 dark:hover:bg-neutral-800 rounded-xl">
               <motion.div
                 layoutId={`card-${user.name}-${id}`}

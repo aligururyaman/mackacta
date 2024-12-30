@@ -40,6 +40,14 @@ const data = {
       ],
     },
     {
+      title: "Oyna",
+      url: "#",
+      items: [
+        { title: "Kadro Kur", url: "#" },
+        { title: "Kadrolar", url: "#" },
+      ],
+    },
+    {
       title: "Bul",
       url: "#",
       items: [
@@ -68,24 +76,17 @@ export function AppSidebar({ onSelectMenu, ...props }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserEmail(user.email); // Kullanıcı e-posta bilgisi
+        setUserEmail(user.email);
       } else {
-        router.push("/"); // Oturum yoksa yönlendirme
+        router.push("/");
       }
-      setLoading(false); // Yükleme tamamlandı
+      setLoading(false);
     });
 
-    return () => unsubscribe(); // Component unmount olduğunda dinleyiciyi kaldır
+    return () => unsubscribe();
   }, [auth, router]);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      router.push("/"); // Çıkış yaptıktan sonra yönlendirme
-    } catch (error) {
-      console.error("Çıkış hatası:", error.message);
-    }
-  };
+
 
 
   return (
@@ -151,21 +152,7 @@ export function AppSidebar({ onSelectMenu, ...props }) {
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
-
         <SidebarRail />
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <div className="flex justify-center h-20">
-                <div className="flex flex-col h-12 leading-none">
-                  <Button variant="link" onClick={handleSignOut}>
-                    Çıkış Yap
-                  </Button>
-                </div>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
       </Sidebar>
     </>
   );

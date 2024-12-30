@@ -26,14 +26,26 @@ import Friends from "../pagescomponents/profile/Friends";
 import Main from "../pagescomponents/main/Main";
 import { auth, db } from "@/utils/firebase";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { motion } from "framer-motion";
 import MatchNotification from "@/components/notifications/MatchNotification";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LogOut, Bell, User } from 'lucide-react';
+import LineUp from "../pagescomponents/play/LineUp";
+import CreateLineUp from "../pagescomponents/play/CreateLineUp";
 
 export default function Dashboard() {
-  const [selectedItem, setSelectedItem] = useState(""); // Ana menü
-  const [selectedSubItem, setSelectedSubItem] = useState(""); // Alt menü
+  const [selectedItem, setSelectedItem] = useState("");
+  const [selectedSubItem, setSelectedSubItem] = useState("");
   const [userName, setUserName] = useState(null);
   const [userSurName, setUserSurName] = useState(null);
   const [friendRequests, setFriendRequests] = useState([]);
@@ -41,7 +53,7 @@ export default function Dashboard() {
   const [teamRequests, setTeamRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [teamData, setTeamData] = useState(null); // Takım verisi
+  const [teamData, setTeamData] = useState(null);
   const router = useRouter();
 
 
@@ -57,18 +69,13 @@ export default function Dashboard() {
             setUserName(userData.name);
             setUserSurName(userData.surname);
 
-            // Kullanıcının takım bilgilerini al
+
             await fetchTeamData(user.uid);
-
-            // Arkadaşlık isteklerini çek
             await fetchFriendRequests(user.uid);
-
-            // Maç isteklerini ve takım isteklerini sadece kaptansa çek
             if (userData.teamId && teamData?.captainId === user.uid) {
               await fetchMatchRequests(user.uid);
               await fetchTeamRequests(user.uid);
             } else {
-              // Eğer kullanıcı kaptan değilse, bu istekleri temizle
               setMatchRequests([]);
               setTeamRequests([]);
             }
@@ -77,8 +84,9 @@ export default function Dashboard() {
           console.error("Kullanıcı bilgileri alınırken hata oluştu:", error);
         }
       } else {
-        router.push("/"); // Kullanıcı giriş yapmamışsa yönlendir
+        router.push("/");
       }
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
@@ -171,7 +179,7 @@ export default function Dashboard() {
   };
 
   const handleToggleNotifications = () => {
-    setShowNotifications((prev) => !prev); // Bildirim panelini aç/kapat
+    setShowNotifications((prev) => !prev)
   };
 
 
@@ -184,7 +192,7 @@ export default function Dashboard() {
     if (savedSelectedSubItem) setSelectedSubItem(savedSelectedSubItem);
   }, []);
 
-  // Seçimler değiştiğinde bu seçimleri sakla
+
   useEffect(() => {
     localStorage.setItem("selectedItem", selectedItem);
     localStorage.setItem("selectedSubItem", selectedSubItem);
@@ -195,7 +203,9 @@ export default function Dashboard() {
     setSelectedSubItem(subItemTitle);
   };
 
-  // Dinamik bileşen seçimi
+
+
+
   const renderContent = () => {
 
     if (selectedSubItem === "Takımım") {
@@ -206,6 +216,12 @@ export default function Dashboard() {
     }
     if (selectedSubItem === "Ayarlar") {
       return <TeamSettings />;
+    }
+    if (selectedSubItem === "Kadro Kur") {
+      return <CreateLineUp />;
+    }
+    if (selectedSubItem === "Kadrolar") {
+      return <LineUp />;
     }
     if (selectedSubItem === "Takım Bul") {
       return <FindTeam />;
@@ -241,6 +257,17 @@ export default function Dashboard() {
     return <div><Main /></div>;
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+      setSelectedItem("Ana Menü");
+      setSelectedSubItem("");
+
+    } catch (error) {
+      console.error("Çıkış hatası:", error.message);
+    }
+  };
   return (
     <SidebarProvider>
       <AppSidebar onSelectMenu={handleMenuSelect} />
@@ -261,31 +288,47 @@ export default function Dashboard() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-
           <div className="flex items-center gap-4">
-            {/* Bildirim Simgesi */}
-            <div
-              className="relative cursor-pointer"
-              onClick={handleToggleNotifications}
-            >
-              <div>
-                {/* Bildirim sayısı */}
-                {(matchRequests?.length >= 1 || friendRequests?.length >= 1 ||
-                  (auth.currentUser?.uid === teamData?.captainId && teamRequests?.length >= 1)) && (
-                    <span className="h-6 w-6 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {matchRequests?.length + friendRequests?.length +
-                        (auth.currentUser?.uid === teamData?.captainId ? teamRequests?.length : 0)}
-                    </span>
-                  )}
-              </div>
+            {/* Kullanıcı Dropdown Menüsü */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <p className="font-semibold cursor-pointer flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  {userName} {userSurName}
+                </p>
+              </DropdownMenuTrigger>
 
-            </div>
+              <DropdownMenuContent className="w-56 bg-foreground z-50">
+                <DropdownMenuLabel>Hesabım</DropdownMenuLabel>
+                <DropdownMenuSeparator />
 
-            {/* Kullanıcı Bilgileri */}
-            <p className="font-semibold cursor-pointer">
-              {userName} {userSurName}
-            </p>
+                {/* Bildirimler Menüsü */}
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={handleToggleNotifications}>
+                    <Bell className="mr-2 w-5 h-5" />
+                    <span>Bildirimler</span>
+                    {(matchRequests?.length >= 1 || friendRequests?.length >= 1 ||
+                      (auth.currentUser?.uid === teamData?.captainId && teamRequests?.length >= 1)) && (
+                        <span className="ml-auto bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center">
+                          {matchRequests?.length + friendRequests?.length +
+                            (auth.currentUser?.uid === teamData?.captainId ? teamRequests?.length : 0)}
+                        </span>
+                      )}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+
+                <DropdownMenuSeparator />
+
+                {/* Çıkış Yap Menüsü */}
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 w-5 h-5" />
+                  <span>Çıkış Yap</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
           </div>
+
         </header>
         <div className="p-3">
           <div className="relative z-10">
@@ -297,7 +340,7 @@ export default function Dashboard() {
           onClose={() => setShowNotifications(false)}
           matchRequests={matchRequests}
           friendRequests={friendRequests}
-          teamRequests={teamRequests} // Takım istekleri eklendi
+          teamRequests={teamRequests}
         />
       </SidebarInset>
     </SidebarProvider>

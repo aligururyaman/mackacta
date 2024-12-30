@@ -33,6 +33,7 @@ const capitalizeWords = (str) => {
 export default function MyTeam() {
   const [teamData, setTeamData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const [members, setMembers] = useState([]);
   const [teamRequests, setTeamRequests] = useState([]);
   const [formData, setFormData] = useState({ name: "", city: "", district: "" });
@@ -50,6 +51,14 @@ export default function MyTeam() {
       setDistricts([]);
     }
   }, [formData.city]);
+
+  useEffect(() => {
+    if (user) {
+      fetchTeamData(user.uid);
+    }
+  }, [user]);
+
+
 
   const handleCreateTeam = async () => {
     try {
@@ -129,66 +138,82 @@ export default function MyTeam() {
   };
 
   useEffect(() => {
-    fetchTeamData();
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        await fetchTeamData(currentUser.uid);
+      } else {
+        setUser(null);
+        setTeamData(null);
+        setMembers([]);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
-  const fetchTeamData = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) return;
+  const fetchTeamData = async (userId) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", userId));
+      if (!userDoc.exists()) {
+        console.error("Kullanıcı verisi bulunamadı.");
+        return;
+      }
 
       const userData = userDoc.data();
-
-      if (userData.teamId) {
-        const teamDoc = await getDoc(doc(db, "teams", userData.teamId));
-        if (!teamDoc.exists()) return;
-
-        const teamData = teamDoc.data();
-        setTeamData({ ...teamData, id: teamDoc.id });
-
-        const membersQuery = query(
-          collection(db, "users"),
-          where("teamId", "==", teamDoc.id)
-        );
-        const membersSnapshot = await getDocs(membersQuery);
-        const membersList = membersSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setMembers(membersList);
-
-        const requestsQuery = query(
-          collection(db, "teamRequests"),
-          where("teamId", "==", teamDoc.id),
-          where("status", "==", "pending")
-        );
-        const requestsSnapshot = await getDocs(requestsQuery);
-        const requestsList = await Promise.all(
-          requestsSnapshot.docs.map(async (requestDoc) => {
-            const requestData = requestDoc.data();
-            const senderDoc = await getDoc(doc(db, "users", requestData.senderId));
-            return {
-              id: requestDoc.id,
-              ...requestData,
-              senderName: senderDoc.data().name || "Bilinmiyor",
-              senderSurname: senderDoc.data().surname || "Bilinmiyor",
-            };
-          })
-        );
-        setTeamRequests(requestsList);
-      } else {
+      if (!userData?.teamId) {
+        console.warn("Kullanıcının bir takımı yok.");
         setTeamData(null);
+        return;
       }
+
+      const teamDoc = await getDoc(doc(db, "teams", userData.teamId));
+      if (!teamDoc.exists()) {
+        console.error("Takım verisi bulunamadı.");
+        setTeamData(null);
+        return;
+      }
+
+      const teamData = teamDoc.data();
+      setTeamData({ id: teamDoc.id, ...teamData });
+
+      // Takım üyelerini getir
+      const membersQuery = query(
+        collection(db, "users"),
+        where("teamId", "==", teamDoc.id)
+      );
+      const membersSnapshot = await getDocs(membersQuery);
+      const membersList = membersSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMembers(membersList);
     } catch (error) {
       console.error("Takım verileri alınırken hata oluştu:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
+
+
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.div
+          animate={{
+            rotate: 360,
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 1,
+            ease: "linear",
+          }}
+          className="w-16 h-16 border-4 border-slate-700 border-t-transparent rounded-full"
+        ></motion.div>
+      </div>
+    );
+  }
 
   const handleRemovePlayer = async (memberId, memberName) => {
     try {
@@ -350,7 +375,7 @@ export default function MyTeam() {
                             <motion.div layoutId={`image-${member.name}-${member.id}`}>
                               <img
                                 className="w-16 h-16 rounded-full bg-gray-300 object-cover"
-                                src={member.profileImage || "/placeholder.png"}
+                                src={member.profileImage}
                                 alt="Profil Resmi"
                               />
                             </motion.div>
@@ -391,29 +416,29 @@ export default function MyTeam() {
                         onClick={(e) => e.stopPropagation()}
                       >
                         <img
-                          className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                          className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-slate-200"
                           src={selectedMember.profileImage || "/placeholder.png"}
                           alt="Profil Resmi"
                         />
                         <div className="flex flex-col items-center my-2">
-                          <p>
+                          <p className="font-bold text-lg">
                             {capitalizeWords(selectedMember.name)} {capitalizeWords(selectedMember.surname)}
                           </p>
-                          <p>Telefon: {selectedMember.phone || "Belirtilmemiş"}</p>
-                          <p>Mevki: {selectedMember.position || "Belirtilmemiş"}</p>
+                          <p className="font-bold">Telefon: <span className="font-medium">{selectedMember.phone || "Belirtilmemiş"}</span> </p>
+                          <p className="font-bold">Mevki: <span className="font-medium">{selectedMember.position || "Belirtilmemiş"}</span></p>
                         </div>
                         <div className="flex flex-row gap-4">
                           {auth.currentUser?.uid === teamData?.captainId &&
                             selectedMember.id !== teamData?.captainId && (
                               <motion.button
-                                className="rounded-xl p-2 bg-button hover:bg-background hover:text-white border-none"
+                                className="rounded-xl p-2 bg-button hover:bg-background hover:text-slate-700 border-none"
                                 onClick={() => handleRemovePlayer(selectedMember.id, selectedMember.name)}
                               >
                                 Oyuncuyu At
                               </motion.button>
                             )}
                           <Button
-                            className="rounded-xl bg-button hover:bg-background hover:text-white border-none"
+                            className="rounded-xl bg-button hover:bg-background hover:text-slate-700 border-none"
                             onClick={() => setSelectedMember(null)}
                           >
                             Kapat

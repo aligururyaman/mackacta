@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import Image from "next/image";
 
 const capitalizeWords = (str) => {
@@ -37,16 +36,12 @@ const capitalizeWords = (str) => {
     .join(" ");
 };
 
-
-
-
 export default function UserInfo() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false); // Düzenleme modu
+  const [editMode, setEditMode] = useState(false);
   const [friendRequests, setFriendRequests] = useState([]);
-  const [teamData, setTeamData] = useState(null); // Takım bilgisi için state
-  const [searchCity, setSearchCity] = useState("");
+  const [teamData, setTeamData] = useState(null);
   const [districts, setDistricts] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -69,116 +64,48 @@ export default function UserInfo() {
   }, [formData.city]);
 
 
+
   useEffect(() => {
-    const fetchFriendRequests = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const requestsRef = collection(db, "friendRequests");
-        const q = query(
-          requestsRef,
-          where("receiverId", "==", user.uid),
-          where("status", "==", "pending") // Yalnızca bekleyen istekler
-        );
-        const querySnapshot = await getDocs(q);
-
-        const requests = await Promise.all(
-          querySnapshot.docs.map(async (docSnapshot) => {
-            const requestData = docSnapshot.data();
-            const senderDocRef = doc(db, "users", requestData.senderId);
-            const senderDoc = await getDoc(senderDocRef);
-
-            return {
-              id: docSnapshot.id,
-              ...requestData,
-              senderName: senderDoc.exists() ? senderDoc.data().name : "Bilinmiyor",
-              senderSurname: senderDoc.exists() ? senderDoc.data().surname : "Bilinmiyor",
-            };
-          })
-        );
-
-        setFriendRequests(requests);
-      } catch (error) {
-        console.error("Arkadaşlık istekleri alınırken hata oluştu:", error);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        await fetchUserData(user.uid);
+      } else {
+        setUserData(null);
+        setTeamData(null);
       }
-    };
+      setLoading(false);
+    });
 
-    fetchFriendRequests();
+    return () => unsubscribe();
   }, []);
 
-
-
-  const handleFriendRequestResponse = async (requestId, status) => {
+  const fetchUserData = async (userId) => {
     try {
-      const requestRef = doc(db, "friendRequests", requestId);
+      const userDoc = await getDoc(doc(db, "users", userId));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setUserData(data);
 
-      if (status === "accepted") {
-        // Arkadaşlık ilişkisi kur
-        const request = friendRequests.find((req) => req.id === requestId);
-
-        await setDoc(
-          doc(db, "users", request.senderId, "friends", request.receiverId),
-          { friendId: request.receiverId, timestamp: new Date() }
-        );
-        await setDoc(
-          doc(db, "users", request.receiverId, "friends", request.senderId),
-          { friendId: request.senderId, timestamp: new Date() }
-        );
-      }
-
-      // İsteği sil veya durumu güncelle
-      await setDoc(requestRef, { status }, { merge: true });
-      setFriendRequests((prev) =>
-        prev.filter((request) => request.id !== requestId)
-      );
-    } catch (error) {
-      console.error("İstek yönetimi sırasında hata oluştu:", error);
-      alert("Bir hata oluştu. Lütfen tekrar deneyin.");
-    }
-  };
-
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setUserData(data);
-
-          // Eğer takım ID'si varsa, takım bilgilerini çek
-          if (data.teamId) {
-            const teamDoc = await getDoc(doc(db, "teams", data.teamId));
-            if (teamDoc.exists()) {
-              setTeamData(teamDoc.data());
-            }
+        if (data.teamId) {
+          const teamDoc = await getDoc(doc(db, "teams", data.teamId));
+          if (teamDoc.exists()) {
+            setTeamData(teamDoc.data());
           }
         }
-      } catch (error) {
-        console.error("Kullanıcı veya takım verisi alınırken hata oluştu:", error);
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchUserData();
-  }, []);
+    } catch (error) {
+      console.error("Kullanıcı veya takım verisi alınırken hata oluştu:", error);
+    }
+  }
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-
-
     try {
       const imageUrl = await uploadToCloudinary(file);
       const user = auth.currentUser;
       if (user) {
-        // Firestore'de kullanıcının profil resmini güncelle
         await setDoc(
           doc(db, "users", user.uid),
           { profileImage: imageUrl },
@@ -197,7 +124,6 @@ export default function UserInfo() {
     try {
       const user = auth.currentUser;
       if (user) {
-        // Yalnızca düzenlenebilir alanları güncelle
         const updatedData = {
           name: formData.name,
           surname: formData.surname,
@@ -209,9 +135,8 @@ export default function UserInfo() {
 
         await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
 
-        // Kullanıcı verilerini güncel haliyle set edin
         setUserData((prev) => ({ ...prev, ...updatedData }));
-        setEditMode(false); // Düzenleme modundan çık
+        setEditMode(false);
       }
     } catch (error) {
       console.error("Bilgiler kaydedilirken hata oluştu:", error);
@@ -220,10 +145,7 @@ export default function UserInfo() {
 
 
   return (
-
-
     <div className="relative w-full max-w-4xl bg-white shadow-xl rounded-lg p-6">
-
       <div >
         <div className="relative h-48 w-full rounded-lg overflow-hidden">
           <Image
@@ -234,10 +156,9 @@ export default function UserInfo() {
           />
           <div className="absolute inset-0 bg-black bg-opacity-30"></div>
         </div>
-
         <div className="relative -top-12 flex flex-col md:flex-row items-center gap-6">
           <img
-            src={userData?.profileImage || "/placeholder.svg"}
+            src={userData?.profileImage}
             alt="Profil Resmi"
             className="w-32 h-32 rounded-full border-4 border-white shadow-md cursor-pointer"
             onClick={() => document.getElementById("profileImageInput").click()}
@@ -262,25 +183,23 @@ export default function UserInfo() {
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Bilgiler</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p className="text-gray-600 font-medium">Telefon:</p>
+            <p className="text-gray-600 font-extrabold">Telefon:</p>
             <p className="text-gray-800">{userData?.phone || "Bilgi Yok"}</p>
           </div>
           <div>
-            <p className="text-gray-600 font-medium">İl:</p>
+            <p className="text-gray-600 font-extrabold">İl:</p>
             <p className="text-gray-800">{userData?.city || "Bilgi Yok"}</p>
           </div>
           <div>
-            <p className="text-gray-600 font-medium">İlçe:</p>
+            <p className="text-gray-600 font-extrabold">İlçe:</p>
             <p className="text-gray-800">{userData?.district || "Bilgi Yok"}</p>
           </div>
           <div>
-            <p className="text-gray-600 font-medium">Mevki:</p>
+            <p className="text-gray-600 font-extrabold">Mevki:</p>
             <p className="text-gray-800">{userData?.position || "Bilgi Yok"}</p>
           </div>
         </div>
       </div>
-
-
 
       <Sheet>
         <SheetTrigger asChild className="flex w-full justify-center">

@@ -303,10 +303,10 @@ export default function Dashboard() {
                 <DropdownMenuSeparator />
 
                 {/* Bildirimler Menüsü */}
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={handleToggleNotifications}>
+                <DropdownMenuGroup onClick={handleToggleNotifications}>
+                  <DropdownMenuItem >
                     <Bell className="mr-2 w-5 h-5" />
-                    <span>Bildirimler</span>
+                    <span >Bildirimler</span>
                     {(matchRequests?.length >= 1 || friendRequests?.length >= 1 ||
                       (auth.currentUser?.uid === teamData?.captainId && teamRequests?.length >= 1)) && (
                         <span className="ml-auto bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center">
@@ -318,6 +318,7 @@ export default function Dashboard() {
                 </DropdownMenuGroup>
 
                 <DropdownMenuSeparator />
+
 
                 {/* Çıkış Yap Menüsü */}
                 <DropdownMenuItem onClick={handleSignOut}>

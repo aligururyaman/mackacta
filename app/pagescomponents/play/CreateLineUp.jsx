@@ -6,13 +6,14 @@ import React, { useEffect, useState } from 'react';
 import pitch from '@/app/assets/main/pitch.png';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 function CreateLineUp() {
   const [userData, setUserData] = useState(null);
   const [teamData, setTeamData] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
-  const [formation, setFormation] = useState('2-3-1');
+  const [formation, setFormation] = useState('');
   const [playerPositions, setPlayerPositions] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [lineups, setLineups] = useState([]);
@@ -32,11 +33,11 @@ function CreateLineUp() {
             if (teamDoc.exists()) {
               const teamData = teamDoc.data();
               setTeamData(teamData);
-
               // Yetki kontrolü
               if (user.uid === teamData.captainId) {
                 setIsAuthorized(true); // Kullanıcı kaptansa yetkilendirilir
               }
+              await fetchUserData(user.uid);
             }
           }
         }
@@ -206,9 +207,6 @@ function CreateLineUp() {
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="mb-4">
-        <label htmlFor="formation" className="mr-2 text-lg font-semibold">
-          Formasyon Seç:
-        </label>
         <Select
           value={formation}
           onValueChange={(value) => {
@@ -236,7 +234,7 @@ function CreateLineUp() {
           placeholder="Kadro Adı"
           value={newLineupName}
           onChange={(e) => setNewLineupName(e.target.value)}
-          className="mt-2 p-2 border rounded-md w-full"
+          className="mt-2 p-2 border rounded-md"
         />
       </div>
 
@@ -262,7 +260,7 @@ function CreateLineUp() {
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
-              <span>+</span>
+              <span className='text-slate-700'>+</span>
             )}
           </div>
         ))}
@@ -271,9 +269,9 @@ function CreateLineUp() {
       {selectedCard !== null && (
         <div className="absolute bg-white p-4 border rounded-lg shadow-lg">
           <h2 className="text-lg font-bold mb-2">Oyuncu Seç</h2>
-          <ul>
+          <ScrollArea >
             {teamMembers.map((member) => (
-              <li
+              <p
                 key={member.id}
                 className="cursor-pointer hover:bg-gray-100 p-2"
                 onClick={() => handleSelectPlayer(member.id)}
@@ -284,14 +282,14 @@ function CreateLineUp() {
                   className="inline-block w-8 h-8 rounded-full mr-2"
                 />
                 {member.name}
-              </li>
+              </p>
             ))}
-          </ul>
+          </ScrollArea>
         </div>
       )}
 
       <Button
-        className="mt-4 bg-button hover:bg-background text-white rounded-lg"
+        className="mt-4 w-40 bg-button hover:bg-foreground text-slate-700 rounded-lg"
         onClick={handleSaveLineup}
       >
         Kaydet

@@ -42,6 +42,7 @@ import {
 import { LogOut, Bell, User } from 'lucide-react';
 import LineUp from "../pagescomponents/play/LineUp";
 import CreateLineUp from "../pagescomponents/play/CreateLineUp";
+import Loading from "@/components/Loading";
 
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState("");
@@ -239,19 +240,7 @@ export default function Dashboard() {
       return <Friends />;
     }
     if (isLoading) {
-      return <div className="flex items-center justify-center min-h-screen bg-background">
-        <motion.div
-          animate={{
-            rotate: 360,
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 1,
-            ease: "linear",
-          }}
-          className="w-16 h-16 border-4 border-slate-700 border-t-transparent rounded-full"
-        ></motion.div>
-      </div>
+      return <Loading />
     }
 
     return <div><Main /></div>;

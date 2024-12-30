@@ -4,6 +4,7 @@ import { collection, getDocs, query, where, doc, getDoc, updateDoc, deleteDoc, s
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import { Button } from "../ui/button";
+import { toast, Toaster } from "react-hot-toast";
 
 function MatchNotification({ show, onClose }) {
   const [teamRequests, setTeamRequests] = useState([]);
@@ -133,15 +134,23 @@ function MatchNotification({ show, onClose }) {
 
   const handleRequestAction = async (requestId, type, action, additionalData = {}) => {
     try {
-      const collectionName =
-        type === "friend" ? "friendRequests" :
-          type === "match" ? "matchRequests" :
-            "teamRequests";
+      // Türkçe tipleri İngilizce koleksiyon isimlerine çeviriyoruz
+      const collectionMap = {
+        "Arkadaşlık": "friendRequests",
+        "Maç Yapma": "matchRequests",
+        "Takıma katılma": "teamRequests",
+      };
+
+      const collectionName = collectionMap[type]; // Doğru koleksiyon adını al
+      if (!collectionName) {
+        throw new Error(`Bilinmeyen istek türü: ${type}`);
+      }
 
       const requestRef = doc(db, collectionName, requestId);
 
+      // Kabul veya reddetme işlemi
       if (action === "accept") {
-        if (type === "team") {
+        if (type === "Takıma katılma") {
           const { senderId, teamId } = additionalData;
 
           // Takım isteği için ek işlem
@@ -152,66 +161,39 @@ function MatchNotification({ show, onClose }) {
         await deleteDoc(requestRef);
       }
 
-      alert(`${type} isteği ${action === "accept" ? "kabul" : "reddedildi"}.`);
+      // Başarı mesajı
+      toast.success(
+        `${type} isteği ${action === "accept" ? "kabul" : "reddedildi"}.`
+      );
 
       // İlgili listeyi güncelle
-      if (action === "accept") {
-        if (type === "friend") {
-          const requestData = await getDoc(requestRef);
-          if (requestData.exists()) {
-            const senderId = requestData.data().senderId;
-
-            // Kullanıcının arkadaşlar koleksiyonuna ekle
-            const userFriendRef = doc(db, "users", auth.currentUser.uid, "friends", senderId);
-            await setDoc(userFriendRef, { friendId: senderId });
-
-            // Arkadaşın arkadaşlar koleksiyonuna da kullanıcıyı ekle
-            const friendUserRef = doc(db, "users", senderId, "friends", auth.currentUser.uid);
-            await setDoc(friendUserRef, { friendId: auth.currentUser.uid });
-          }
-        }
-        await updateDoc(requestRef, { status: "accepted" });
+      if (type === "Arkadaşlık") {
+        setFriendRequests((prev) =>
+          prev.filter((request) => request.id !== requestId)
+        );
+      } else if (type === "Maç Yapma") {
+        setMatchRequests((prev) =>
+          prev.filter((request) => request.id !== requestId)
+        );
+      } else if (type === "Takıma katılma") {
+        setTeamRequests((prev) =>
+          prev.filter((request) => request.id !== requestId)
+        );
       }
-
-      if (type === "match" && action === "accept") {
-        const requestDoc = await getDoc(doc(db, "matchRequests", requestId));
-
-        if (requestDoc.exists()) {
-          const matchData = requestDoc.data();
-          await addDoc(collection(db, "matches"), {
-            ...matchData,
-            status: "scheduled", // Yeni koleksiyonda durumu "scheduled" olarak belirleyin
-          });
-
-          await deleteDoc(doc(db, "matchRequests", requestId)); // İstek koleksiyonundan sil
-          setMatchRequests((prev) => prev.filter((req) => req.id !== requestId));
-        }
-      }
-      if (action === "accept" && type === "team") {
-        const { senderId, teamId } = additionalData;
-
-        if (!teamId || !senderId) {
-          console.error("Team ID or Sender ID is undefined!");
-          return;
-        }
-
-        console.log("Takıma eklenen kullanıcı ID'si:", senderId, "Takım ID'si:", teamId);
-
-        // Kullanıcıyı takıma ekleme
-        await updateDoc(doc(db, "users", senderId), { teamId });
-        await updateDoc(requestRef, { status: "accepted" });
-      }
-
-
     } catch (error) {
+      toast.error(`${type} isteği ${action} edilirken hata oluştu.`);
       console.error(`${type} isteği ${action} edilirken hata oluştu:`, error);
     }
   };
 
 
+
+
+
   return (
     <Sheet open={show} onOpenChange={onClose}>
       {/* Maç İstekleri */}
+      <Toaster position="top-right" reverseOrder={false} />
       <SheetContent>
         <SheetHeader>
           <SheetTitle className="text-slate-700">Bildirimler</SheetTitle>
@@ -230,10 +212,10 @@ function MatchNotification({ show, onClose }) {
                   sizi arkadaş olarak ekledi.
                 </span>
                 <div className="flex flex-row gap-4">
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "friend", "accept")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "Arkadaşlık", "accept")}>
                     Kabul Et
                   </Button>
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "friend", "reject")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "Arkadaşlık", "reject")}>
                     Reddet
                   </Button>
                 </div>
@@ -249,10 +231,10 @@ function MatchNotification({ show, onClose }) {
                   <strong>{request.senderTeamName || "Bilinmiyor"}</strong> sizinle maç yapmak istiyor.
                 </span>
                 <div className="flex flex-row gap-4">
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "match", "accept")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "Maç Yapma", "accept")}>
                     Kabul Et
                   </Button>
-                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "match", "reject")}>
+                  <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "Maç Yapma", "reject")}>
                     Reddet
                   </Button>
                 </div>
@@ -270,7 +252,7 @@ function MatchNotification({ show, onClose }) {
                 <Button
                   className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600"
                   onClick={() =>
-                    handleRequestAction(request.id, "team", "accept", {
+                    handleRequestAction(request.id, "Takıma katılma", "accept", {
                       senderId: request.senderId,
                       teamId: userTeamId,
                     })
@@ -278,7 +260,7 @@ function MatchNotification({ show, onClose }) {
                 >
                   Kabul Et
                 </Button>
-                <Button className="rounded-xl bg-button hover:bg-background hover:text-slate-600" onClick={() => handleRequestAction(request.id, "team", "reject")}>
+                <Button className="rounded-xl bg-button hover:bg-background hover:text-slate-600" onClick={() => handleRequestAction(request.id, "Takıma katılma", "reject")}>
                   Reddet
                 </Button>
 

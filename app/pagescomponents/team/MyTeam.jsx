@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import cityData from "../../cityData/cityData.json"; // Şehir ve ilçe verileri için JSON
+import cityData from "../../cityData/cityData.json";
 import {
   Select,
   SelectContent,
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import Image from "next/image";
+import Loading from "@/components/Loading";
+import ConfirmDialog from "@/components/dialog/ConfirmDialog";
 
 const capitalizeWords = (str) => {
   if (!str) return "";
@@ -35,11 +37,12 @@ export default function MyTeam() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [members, setMembers] = useState([]);
-  const [teamRequests, setTeamRequests] = useState([]);
   const [formData, setFormData] = useState({ name: "", city: "", district: "" });
   const [districts, setDistricts] = useState([]);
   const [teamImage, setTeamImage] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogData, setDialogData] = useState({ memberId: null, memberName: "" });
 
   useEffect(() => {
     if (formData.city) {
@@ -101,41 +104,6 @@ export default function MyTeam() {
     }
   };
 
-  const handleSendFriendRequest = async (receiverId) => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Giriş yapmalısınız.");
-        return;
-      }
-
-      const friendRequestRef = collection(db, "friendRequests");
-
-      const existingRequest = await getDocs(
-        query(
-          friendRequestRef,
-          where("senderId", "==", user.uid),
-          where("receiverId", "==", receiverId)
-        )
-      );
-
-      if (!existingRequest.empty) {
-        alert("Bu kullanıcıya zaten bir istek gönderdiniz.");
-        return;
-      }
-
-      await setDoc(doc(friendRequestRef), {
-        senderId: user.uid,
-        receiverId: receiverId,
-        status: "pending",
-        timestamp: new Date(),
-      });
-
-      alert("Arkadaşlık isteği gönderildi.");
-    } catch (error) {
-      console.error("Arkadaşlık isteği gönderilirken hata oluştu:", error);
-    }
-  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
@@ -184,11 +152,17 @@ export default function MyTeam() {
         where("teamId", "==", teamDoc.id)
       );
       const membersSnapshot = await getDocs(membersQuery);
-      const membersList = membersSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMembers(membersList);
+
+      // Verilerin boş olup olmadığını kontrol et
+      if (!membersSnapshot.empty) {
+        const membersList = membersSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setMembers(membersList);
+      } else {
+        setMembers([]); // Boş liste
+      }
     } catch (error) {
       console.error("Takım verileri alınırken hata oluştu:", error);
     }
@@ -196,44 +170,36 @@ export default function MyTeam() {
 
 
 
+  const openDialog = (memberId, memberName) => {
+    setDialogData({ memberId, memberName });
+    setIsDialogOpen(true);
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <motion.div
-          animate={{
-            rotate: 360,
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 1,
-            ease: "linear",
-          }}
-          className="w-16 h-16 border-4 border-slate-700 border-t-transparent rounded-full"
-        ></motion.div>
-      </div>
+      <Loading />
     );
   }
 
-  const handleRemovePlayer = async (memberId, memberName) => {
+  const handleRemovePlayer = async () => {
     try {
-      const confirmation = window.confirm(
-        `${memberName} oyuncusunu takımdan çıkarmak istediğinize emin misiniz?`
-      );
-      if (!confirmation) return;
-
-      // Kullanıcının `teamId` bilgisini null yap
-      await updateDoc(doc(db, "users", memberId), {
+      await updateDoc(doc(db, "users", dialogData.memberId), {
         teamId: null,
       });
 
-      alert(`${memberName} oyuncusu takımdan çıkarıldı.`);
-      fetchTeamData(); // Verileri güncelle
+      setMembers((prevMembers) =>
+        prevMembers.filter((member) => member.id !== dialogData.memberId)
+      );
+      setSelectedMember(false)
+      setIsDialogOpen(false);
+      fetchTeamData();
+      alert(`${dialogData.memberName} oyuncusu takımdan çıkarıldı.`);
     } catch (error) {
       console.error("Oyuncu takımdan çıkarılırken hata oluştu:", error);
       alert("Bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
+
 
 
   return (
@@ -432,10 +398,11 @@ export default function MyTeam() {
                             selectedMember.id !== teamData?.captainId && (
                               <motion.button
                                 className="rounded-xl p-2 bg-button hover:bg-background hover:text-slate-700 border-none"
-                                onClick={() => handleRemovePlayer(selectedMember.id, selectedMember.name)}
+                                onClick={() => openDialog(selectedMember.id, selectedMember.name)}
                               >
                                 Oyuncuyu At
                               </motion.button>
+
                             )}
                           <Button
                             className="rounded-xl bg-button hover:bg-background hover:text-slate-700 border-none"
@@ -453,6 +420,13 @@ export default function MyTeam() {
           )}
         </div>
       )}
+      <ConfirmDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onConfirm={handleRemovePlayer}
+        title="Oyuncuyu Takımdan Çıkar"
+        description={`${dialogData.memberName} oyuncusunu takımdan çıkarmak istediğinizden emin misiniz?`}
+      />;
     </div>
   );
 }

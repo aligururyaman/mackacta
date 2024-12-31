@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import { auth, db } from "@/utils/firebase";
-import { doc, getDoc, setDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, query, where, getDocs, deleteDoc, updateDoc, addDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -22,6 +22,7 @@ import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import Image from "next/image";
 import Loading from "@/components/Loading";
 import ConfirmDialog from "@/components/dialog/ConfirmDialog";
+import AddFriendDialog from "@/components/dialog/AddFriendDialog";
 
 const capitalizeWords = (str) => {
   if (!str) return "";
@@ -41,8 +42,11 @@ export default function MyTeam() {
   const [districts, setDistricts] = useState([]);
   const [teamImage, setTeamImage] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // Dialog pencereleri ile ilgili kısım
+  const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState({ memberId: null, memberName: "" });
+  const [friendDialogData, setFriendDialogData] = useState({ memberId: null, memberName: "" });
 
   useEffect(() => {
     if (formData.city) {
@@ -60,7 +64,6 @@ export default function MyTeam() {
       fetchTeamData(user.uid);
     }
   }, [user]);
-
 
 
   const handleCreateTeam = async () => {
@@ -96,11 +99,27 @@ export default function MyTeam() {
     }
   };
 
-  const handleImageUpload = (e) => {
+
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setTeamImage(file);
-      alert("Resim seçildi, kaydet butonuna basarak yükleyebilirsiniz.");
+    if (!file) return;
+
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      const user = auth.currentUser;
+
+      if (user && teamData?.id) {
+
+        await updateDoc(doc(db, "teams", teamData.id), {
+          teamImage: imageUrl,
+        });
+
+        setTeamData((prev) => ({ ...prev, teamImage: imageUrl }));
+        alert("Takım resmi başarıyla güncellendi!");
+      }
+    } catch (error) {
+      console.error("Resim yüklenirken hata oluştu:", error);
+      alert("Resim yükleme sırasında bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
 
@@ -169,10 +188,14 @@ export default function MyTeam() {
   };
 
 
-
   const openDialog = (memberId, memberName) => {
     setDialogData({ memberId, memberName });
-    setIsDialogOpen(true);
+    setIsRemoveDialogOpen(true);
+  };
+
+  const addFriend = (memberId, memberName) => {
+    setFriendDialogData({ memberId, memberName });
+    setIsAddDialogOpen(true);
   };
 
   if (loading) {
@@ -200,7 +223,42 @@ export default function MyTeam() {
     }
   };
 
+  const handleSendFriendRequest = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Giriş yapmalısınız.");
+        return;
+      }
 
+      const friendRequestRef = collection(db, "friendRequests");
+
+      const existingRequest = await getDocs(
+        query(
+          friendRequestRef,
+          where("senderId", "==", user.uid),
+          where("receiverId", "==", friendDialogData.memberId)
+        )
+      );
+
+      if (!existingRequest.empty) {
+        alert("Bu kullanıcıya zaten bir istek gönderdiniz.");
+        return;
+      }
+
+      await addDoc(friendRequestRef, {
+        senderId: user.uid,
+        receiverId: friendDialogData.memberId,
+        status: "pending",
+        timestamp: new Date(),
+      });
+
+      alert("Arkadaşlık isteği gönderildi.");
+    } catch (error) {
+      console.error("Arkadaşlık isteği gönderilirken hata oluştu:", error);
+      alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+    }
+  };
 
   return (
     <div className="w-">
@@ -290,7 +348,9 @@ export default function MyTeam() {
                 objectFit="cover"
                 className="rounded-xl"
                 priority
+
               />
+
               {/* Overlay */}
               <div className="absolute inset-0 bg-black bg-opacity-30 rounded-xl"></div>
             </div>
@@ -298,9 +358,17 @@ export default function MyTeam() {
             {/* Content */}
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between  p-6 rounded-2xl shadow-lg w-full max-w-5xl">
               <img
-                src={teamData.teamImage}
+                src={teamData?.teamImage}
                 alt="Takım Resmi"
-                className="w-40 h-40 rounded-full object-cover"
+                className="w-40 h-40 rounded-full object-cover cursor-pointer"
+                onClick={() => document.getElementById("teamImageInput").click()}
+              />
+              <input
+                type="file"
+                id="teamImageInput"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
               />
               <div className="text-center md:text-left mt-4 md:mt-0 md:ml-6 text-slate-200 ">
                 <p className="text-3xl font-extrabold">{teamData.name}</p>
@@ -396,20 +464,22 @@ export default function MyTeam() {
                         <div className="flex flex-row gap-4">
                           {auth.currentUser?.uid === teamData?.captainId &&
                             selectedMember.id !== teamData?.captainId && (
-                              <motion.button
-                                className="rounded-xl p-2 bg-button hover:bg-background hover:text-slate-700 border-none"
-                                onClick={() => openDialog(selectedMember.id, selectedMember.name)}
-                              >
-                                Oyuncuyu At
-                              </motion.button>
-
+                              <div className="flex flex-row gap-4">
+                                <motion.button
+                                  className="rounded-xl p-2 bg-button hover:bg-background hover:text-slate-700 border-none"
+                                  onClick={() => openDialog(selectedMember.id, selectedMember.name)}
+                                >
+                                  Oyuncuyu At
+                                </motion.button>
+                                <motion.button
+                                  className="rounded-xl p-2 bg-button hover:bg-background hover:text-slate-700 border-none"
+                                  onClick={() => addFriend(selectedMember.id, selectedMember.name)}
+                                >
+                                  Arkadaş Ekle
+                                </motion.button>
+                              </div>
                             )}
-                          <Button
-                            className="rounded-xl bg-button hover:bg-background hover:text-slate-700 border-none"
-                            onClick={() => setSelectedMember(null)}
-                          >
-                            Kapat
-                          </Button>
+
                         </div>
                       </motion.div>
                     </motion.div>
@@ -421,12 +491,19 @@ export default function MyTeam() {
         </div>
       )}
       <ConfirmDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        isOpen={isRemoveDialogOpen}
+        onClose={() => setIsRemoveDialogOpen(false)}
         onConfirm={handleRemovePlayer}
         title="Oyuncuyu Takımdan Çıkar"
         description={`${dialogData.memberName} oyuncusunu takımdan çıkarmak istediğinizden emin misiniz?`}
-      />;
+      />
+      <AddFriendDialog
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onConfirm={handleSendFriendRequest}
+        title="Arkadaş Olarak Ekle"
+        description={` Arkadaşlık isteği göndermek istediğinizden emin misiniz?`}
+      />
     </div>
   );
 }

@@ -28,7 +28,6 @@ import { auth, db } from "@/utils/firebase";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { motion } from "framer-motion";
 import MatchNotification from "@/components/notifications/MatchNotification";
 import {
   DropdownMenu,

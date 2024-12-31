@@ -11,13 +11,13 @@ function MatchNotification({ show, onClose }) {
   const [friendRequests, setFriendRequests] = useState([]);
   const [userTeamId, setUserTeamId] = useState([]);
   const [matchRequests, setMatchRequests] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   const fetchRequests = async (collectionName, filters = [], type) => {
     try {
       const user = auth.currentUser;
       if (!user) return [];
 
-      // Query oluşturma
       let q = query(collection(db, collectionName));
       filters.forEach((filter) => {
         q = query(q, where(filter.field, filter.op, filter.value));
@@ -25,12 +25,10 @@ function MatchNotification({ show, onClose }) {
 
       const snapshot = await getDocs(q);
 
-      // Verileri işleme
       const requests = await Promise.all(
         snapshot.docs.map(async (docSnapshot) => {
           const requestData = docSnapshot.data();
 
-          // Kullanıcı veya takım bilgilerini ekleme
           if (type === "friend") {
             const senderDoc = await getDoc(doc(db, "users", requestData.senderId));
             return {
@@ -56,7 +54,13 @@ function MatchNotification({ show, onClose }) {
               senderName: senderDoc.exists() ? senderDoc.data().name : "Bilinmiyor",
               senderSurname: senderDoc.exists() ? senderDoc.data().surname : "Bilinmiyor",
             };
+          } else if (type === "notification") {
+            return {
+              id: docSnapshot.id,
+              ...requestData,
+            };
           }
+
           return { id: docSnapshot.id, ...requestData };
         })
       );
@@ -76,7 +80,16 @@ function MatchNotification({ show, onClose }) {
 
         const userId = user.uid;
 
-        // Arkadaşlık isteklerini getir (her kullanıcı görebilir)
+        // Bildirimler
+        const notifications = await fetchRequests(
+          "notifications",
+          [{ field: "status", op: "==", value: "unread" }],
+          "notification"
+        );
+
+        console.log("Bildirimler:", notifications);
+
+        // Arkadaşlık istekleri
         const friendRequests = await fetchRequests(
           "friendRequests",
           [
@@ -85,25 +98,24 @@ function MatchNotification({ show, onClose }) {
           ],
           "friend"
         );
+
         setFriendRequests(friendRequests);
 
-        // Kullanıcının bir takım kaptanı olup olmadığını kontrol et
+        // Kullanıcının takımını kontrol et
         const teamSnapshot = await getDocs(
           query(collection(db, "teams"), where("captainId", "==", userId))
         );
 
         if (teamSnapshot.empty) {
-          // Kullanıcı takım kaptanı değilse, takım ve maç isteklerini temizle
           setTeamRequests([]);
           setMatchRequests([]);
           return;
         }
 
-        // Kullanıcı bir takım kaptanıysa, takım ID'sini al
         const teamData = teamSnapshot.docs[0].data();
         const userTeamId = teamSnapshot.docs[0].id;
 
-        // Maç isteklerini getir (sadece takım kaptanları görebilir)
+        // Maç istekleri
         const matchRequests = await fetchRequests(
           "matchRequests",
           [
@@ -114,7 +126,7 @@ function MatchNotification({ show, onClose }) {
         );
         setMatchRequests(matchRequests);
 
-        // Takım katılma isteklerini getir (sadece takım kaptanları görebilir)
+        // Takım istekleri
         const teamRequests = await fetchRequests(
           "teamRequests",
           [
@@ -125,12 +137,29 @@ function MatchNotification({ show, onClose }) {
         );
         setTeamRequests(teamRequests);
 
-        setUserTeamId(userTeamId); // Kullanıcının takım ID'sini kaydet
+        setUserTeamId(userTeamId);
       })();
     }
   }, [show]);
 
+  useEffect(() => {
+    if (show) {
+      (async () => {
+        const user = auth.currentUser;
+        if (!user) return;
 
+        const userId = user.uid;
+
+        // Bildirimleri getir
+        const notificationsData = await fetchRequests(
+          "notifications",
+          [{ field: "status", op: "==", value: "unread" }],
+          "notification"
+        );
+        setNotifications(notificationsData);
+      })();
+    }
+  }, [show]);
 
   const handleRequestAction = async (requestId, type, action, additionalData = {}) => {
     try {
@@ -187,9 +216,6 @@ function MatchNotification({ show, onClose }) {
   };
 
 
-
-
-
   return (
     <Sheet open={show} onOpenChange={onClose}>
       {/* Maç İstekleri */}
@@ -228,8 +254,14 @@ function MatchNotification({ show, onClose }) {
                 className="flex flex-col justify-between items-center mt-4 p-2 border-2 rounded-xl gap-4"
               >
                 <span>
-                  <strong>{request.senderTeamName || "Bilinmiyor"}</strong> sizinle maç yapmak istiyor.
+                  <strong>{request.senderTeamName}</strong> <span className="font-bold text-slate-400">{
+                    `${request.timestamp.toDate().toLocaleDateString("tr-TR", {
+                      day: "2-digit",
+                      month: "long",
+                    })} ${request.timestamp.toDate().toLocaleDateString("tr-TR", { weekday: "long" })}`
+                  }</span> günü sizinle maç yapmak istiyor.
                 </span>
+
                 <div className="flex flex-row gap-4">
                   <Button className="rounded-xl bg-button hover:bg-background hover:text-text-slate-600" onClick={() => handleRequestAction(request.id, "Maç Yapma", "accept")}>
                     Kabul Et

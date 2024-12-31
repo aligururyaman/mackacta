@@ -40,7 +40,6 @@ export default function UserInfo() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  const [friendRequests, setFriendRequests] = useState([]);
   const [teamData, setTeamData] = useState(null);
   const [districts, setDistricts] = useState([]);
   const [formData, setFormData] = useState({
@@ -142,6 +141,8 @@ export default function UserInfo() {
       console.error("Bilgiler kaydedilirken hata oluştu:", error);
     }
   };
+
+
 
 
   return (

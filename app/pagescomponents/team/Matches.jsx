@@ -166,7 +166,7 @@ const Matches = () => {
         {/* Liste görünürlüğü kontrolü */}
         {isListVisiblePast && (
           <div className="mt-4">
-            <ScheduledMatches matches={pastMatches} ownTeamId={teamData?.id} />
+            <ScheduledMatches matches={pastMatches} ownTeamId={teamData?.id} past={true} />
           </div>
         )}
       </div>

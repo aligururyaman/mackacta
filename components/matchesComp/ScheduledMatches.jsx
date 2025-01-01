@@ -46,13 +46,6 @@ const ScheduledMatches = ({ matches, ownTeamId }) => {
                 </p>
                 <p className="text-sm text-gray-600">{match.time || "Saat Yok"}</p>
               </div>
-
-
-              <div className="w-full border-t border-gray-300"></div>
-
-              <Button variant="outline" className="rounded-xl bg-button hover:bg-background hover:text-slate-700 border-none" >
-                Detay
-              </Button>
             </div>
           </div>
         );
